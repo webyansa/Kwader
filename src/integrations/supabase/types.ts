@@ -541,6 +541,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      register_organization: {
+        Args: {
+          _city?: string
+          _email?: string
+          _license_number?: string
+          _name_ar: string
+          _phone?: string
+          _website?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
