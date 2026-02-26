@@ -19,13 +19,22 @@ const Login = () => {
     e.preventDefault();
     if (!email.trim() || !password) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setLoading(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) {
+      setLoading(false);
       toast({ title: "خطأ في تسجيل الدخول", description: error.message, variant: "destructive" });
-    } else {
-      navigate("/");
+      return;
     }
+
+    // Check if user has admin role to redirect appropriately
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id);
+
+    setLoading(false);
+    const isAdmin = roles?.some((r) => ["super_admin", "admin", "moderator"].includes(r.role));
+    navigate(isAdmin ? "/admin" : "/");
   };
 
   return (
