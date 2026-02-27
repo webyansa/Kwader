@@ -12,18 +12,51 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [isRecovery, setIsRecovery] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Listen for PASSWORD_RECOVERY event from Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+        setChecking(false);
+      } else if (event === "SIGNED_IN" && session) {
+        // Sometimes recovery comes as SIGNED_IN with recovery token
+        const hash = window.location.hash;
+        const params = new URLSearchParams(hash.replace("#", ""));
+        if (params.get("type") === "recovery") {
+          setIsRecovery(true);
+          setChecking(false);
+        }
+      }
+    });
+
+    // Also check the URL hash directly for recovery tokens
     const hash = window.location.hash;
     if (hash.includes("type=recovery")) {
       setIsRecovery(true);
+      setChecking(false);
     }
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setIsRecovery(true);
-    });
+
+    // Check URL search params (some flows use query params)
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get("type") === "recovery") {
+      setIsRecovery(true);
+      setChecking(false);
+    }
+
+    // Give Supabase time to process the recovery token
+    const timeout = setTimeout(() => {
+      setChecking(false);
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleReset = async (e: React.FormEvent) => {
@@ -47,12 +80,29 @@ const ResetPassword = () => {
     }
   };
 
+  if (checking) {
+    return (
+      <div className="flex min-h-screen flex-col" dir="rtl">
+        <Navbar />
+        <main className="flex flex-1 items-center justify-center px-4 py-16">
+          <p className="text-muted-foreground">جارٍ التحقق من الرابط...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!isRecovery) {
     return (
       <div className="flex min-h-screen flex-col" dir="rtl">
         <Navbar />
         <main className="flex flex-1 items-center justify-center px-4 py-16">
-          <p className="text-muted-foreground">رابط غير صالح أو منتهي الصلاحية.</p>
+          <div className="text-center space-y-4">
+            <p className="text-muted-foreground">رابط غير صالح أو منتهي الصلاحية.</p>
+            <Button variant="outline" onClick={() => navigate("/forgot-password")}>
+              طلب رابط استعادة جديد
+            </Button>
+          </div>
         </main>
         <Footer />
       </div>
