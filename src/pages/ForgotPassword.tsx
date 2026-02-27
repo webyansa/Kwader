@@ -8,8 +8,15 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-const RESET_PASSWORD_REDIRECT_URL = "https://impact-careers.lovable.app/reset-password";
+const FALLBACK_PRODUCTION_ORIGIN = "https://impact-careers.lovable.app";
 const RESEND_COOLDOWN_SECONDS = 60;
+
+const getResetPasswordRedirectUrl = () => {
+  const hostname = window.location.hostname;
+  const isPreviewHost = hostname.includes("lovableproject.com") || hostname.includes("id-preview--");
+  const origin = isPreviewHost ? FALLBACK_PRODUCTION_ORIGIN : window.location.origin;
+  return `${origin}/reset-password`;
+};
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +25,7 @@ const ForgotPassword = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendLoading, setResendLoading] = useState(false);
   const { toast } = useToast();
+  const resetRedirectUrl = getResetPasswordRedirectUrl();
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -27,7 +35,7 @@ const ForgotPassword = () => {
 
   const sendResetLink = async (targetEmail: string) => {
     return supabase.auth.resetPasswordForEmail(targetEmail, {
-      redirectTo: RESET_PASSWORD_REDIRECT_URL,
+      redirectTo: resetRedirectUrl,
     });
   };
 
@@ -78,6 +86,10 @@ const ForgotPassword = () => {
           {sent ? (
             <div className="text-center space-y-4">
               <p className="text-success font-medium">تم إرسال رابط الاستعادة إلى بريدك الإلكتروني</p>
+              <p className="text-xs text-muted-foreground">وجهة رابط التعيين: {resetRedirectUrl}</p>
+              <p className="text-xs text-muted-foreground">
+                إذا ظهر خطأ ERR_CONNECTION_RESET عند الضغط من البريد، فهذه مشكلة شبكة قبل الوصول للموقع؛ جرّب فتح الرابط من شبكة أخرى أو VPN.
+              </p>
               <Button
                 type="button"
                 variant="outline"
