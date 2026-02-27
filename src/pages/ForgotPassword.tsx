@@ -8,6 +8,15 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
+const PUBLISHED_APP_URL = "https://impact-careers.lovable.app";
+
+const getResetPasswordRedirectUrl = () => {
+  const hostname = window.location.hostname;
+  const isPreviewHost = hostname.endsWith("lovableproject.com") || hostname.includes("id-preview--");
+  const baseUrl = isPreviewHost ? PUBLISHED_APP_URL : window.location.origin;
+  return `${baseUrl}/reset-password`;
+};
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +28,7 @@ const ForgotPassword = () => {
     if (!email.trim()) return;
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: getResetPasswordRedirectUrl(),
     });
     setLoading(false);
     if (error) {

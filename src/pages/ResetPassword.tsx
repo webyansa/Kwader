@@ -18,42 +18,79 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Listen for PASSWORD_RECOVERY event from Supabase
+    let isMounted = true;
+
+    const setRecoveryState = (value: boolean) => {
+      if (!isMounted) return;
+      setIsRecovery(value);
+      setChecking(false);
+    };
+
+    const getUrlParams = () => {
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const searchParams = new URLSearchParams(window.location.search);
+      return { hashParams, searchParams };
+    };
+
+    const verifyRecoveryFromUrl = async () => {
+      const { hashParams, searchParams } = getUrlParams();
+      const recoveryType = hashParams.get("type") ?? searchParams.get("type");
+      const hasAccessToken = Boolean(hashParams.get("access_token") ?? searchParams.get("access_token"));
+
+      if (recoveryType === "recovery" && hasAccessToken) {
+        setRecoveryState(true);
+        return;
+      }
+
+      const code = searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) {
+          setRecoveryState(true);
+          return;
+        }
+      }
+
+      const tokenHash = searchParams.get("token_hash") ?? hashParams.get("token_hash");
+      if (recoveryType === "recovery" && tokenHash) {
+        const { error } = await supabase.auth.verifyOtp({
+          type: "recovery",
+          token_hash: tokenHash,
+        });
+        if (!error) {
+          setRecoveryState(true);
+          return;
+        }
+      }
+
+      setRecoveryState(recoveryType === "recovery");
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
       if (event === "PASSWORD_RECOVERY") {
-        setIsRecovery(true);
-        setChecking(false);
-      } else if (event === "SIGNED_IN" && session) {
-        // Sometimes recovery comes as SIGNED_IN with recovery token
-        const hash = window.location.hash;
-        const params = new URLSearchParams(hash.replace("#", ""));
-        if (params.get("type") === "recovery") {
-          setIsRecovery(true);
-          setChecking(false);
+        setRecoveryState(true);
+        return;
+      }
+
+      if (event === "SIGNED_IN" && session) {
+        const { hashParams, searchParams } = getUrlParams();
+        const recoveryType = hashParams.get("type") ?? searchParams.get("type");
+        if (recoveryType === "recovery") {
+          setRecoveryState(true);
         }
       }
     });
 
-    // Also check the URL hash directly for recovery tokens
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setIsRecovery(true);
-      setChecking(false);
-    }
-
-    // Check URL search params (some flows use query params)
-    const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.get("type") === "recovery") {
-      setIsRecovery(true);
-      setChecking(false);
-    }
-
-    // Give Supabase time to process the recovery token
     const timeout = setTimeout(() => {
-      setChecking(false);
-    }, 3000);
+      if (isMounted) setChecking(false);
+    }, 7000);
+
+    void verifyRecoveryFromUrl();
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
