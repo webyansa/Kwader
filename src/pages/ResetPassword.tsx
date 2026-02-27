@@ -35,11 +35,19 @@ const ResetPassword = () => {
     const verifyRecoveryFromUrl = async () => {
       const { hashParams, searchParams } = getUrlParams();
       const recoveryType = hashParams.get("type") ?? searchParams.get("type");
-      const hasAccessToken = Boolean(hashParams.get("access_token") ?? searchParams.get("access_token"));
+      const accessToken = hashParams.get("access_token") ?? searchParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token") ?? searchParams.get("refresh_token");
 
-      if (recoveryType === "recovery" && hasAccessToken) {
-        setRecoveryState(true);
-        return;
+      if (recoveryType === "recovery" && accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!error) {
+          setRecoveryState(true);
+          return;
+        }
       }
 
       const code = searchParams.get("code");

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,34 +8,62 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-const PUBLISHED_APP_URL = "https://impact-careers.lovable.app";
-
-const getResetPasswordRedirectUrl = () => {
-  const hostname = window.location.hostname;
-  const isPreviewHost = hostname.endsWith("lovableproject.com") || hostname.includes("id-preview--");
-  const baseUrl = isPreviewHost ? PUBLISHED_APP_URL : window.location.origin;
-  return `${baseUrl}/reset-password`;
-};
+const RESET_PASSWORD_REDIRECT_URL = "https://impact-careers.lovable.app/reset-password";
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const sendResetLink = async (targetEmail: string) => {
+    return supabase.auth.resetPasswordForEmail(targetEmail, {
+      redirectTo: RESET_PASSWORD_REDIRECT_URL,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) return;
+
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: getResetPasswordRedirectUrl(),
-    });
+    const { error } = await sendResetLink(normalizedEmail);
     setLoading(false);
+
     if (error) {
       toast({ title: "خطأ", description: error.message, variant: "destructive" });
-    } else {
-      setSent(true);
+      return;
     }
+
+    setSent(true);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+  };
+
+  const handleResend = async () => {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || resendCooldown > 0 || resendLoading) return;
+
+    setResendLoading(true);
+    const { error } = await sendResetLink(normalizedEmail);
+    setResendLoading(false);
+
+    if (error) {
+      toast({ title: "تعذر إعادة الإرسال", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    toast({ title: "تمت إعادة إرسال رابط الاستعادة" });
   };
 
   return (
@@ -50,6 +78,19 @@ const ForgotPassword = () => {
           {sent ? (
             <div className="text-center space-y-4">
               <p className="text-success font-medium">تم إرسال رابط الاستعادة إلى بريدك الإلكتروني</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResend}
+                disabled={resendLoading || resendCooldown > 0}
+                className="w-full"
+              >
+                {resendLoading
+                  ? "جارٍ إعادة الإرسال..."
+                  : resendCooldown > 0
+                    ? `إعادة الإرسال خلال ${resendCooldown} ثانية`
+                    : "إعادة إرسال الرابط"}
+              </Button>
               <Link to="/login"><Button variant="outline">العودة لتسجيل الدخول</Button></Link>
             </div>
           ) : (
