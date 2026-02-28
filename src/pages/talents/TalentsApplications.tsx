@@ -69,7 +69,7 @@ const TalentsApplications = () => {
                       </div>
                     </div>
                     <Button variant="outline" size="sm" asChild>
-                      <Link to={`/talent/applications/${app.id}`}>
+                      <Link to={`/talents/applications/${app.id}`}>
                         <Eye className="h-4 w-4 ml-1" /> عرض التفاصيل
                       </Link>
                     </Button>
