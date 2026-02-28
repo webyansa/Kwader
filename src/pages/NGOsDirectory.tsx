@@ -30,20 +30,22 @@ const NGOsDirectory = () => {
   useEffect(() => {
     const fetchNGOs = async () => {
       setLoading(true);
-      let query = supabase
+      const query = supabase
         .from("organizations")
         .select("id, name_ar, slug, logo_url, city, description, website")
-        .eq("status", "active")
-        .order("name_ar");
+        .eq("status", "active" as any)
+        .order("name_ar") as any;
+      
+      let q = query.eq("profile_status", "approved");
 
       if (cityFilter && cityFilter !== "all") {
-        query = query.eq("city", cityFilter);
+        q = q.eq("city", cityFilter);
       }
       if (search) {
-        query = query.ilike("name_ar", `%${search}%`);
+        q = q.ilike("name_ar", `%${search}%`);
       }
 
-      const { data } = await query;
+      const { data } = await q;
       setNgos(data || []);
       setLoading(false);
     };

@@ -29,6 +29,7 @@ import AdminOrganizations from "./pages/admin/AdminOrganizations";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import AdminNGOReviews from "./pages/admin/AdminNGOReviews";
 import PortalLayout from "./components/portal/PortalLayout";
 import PortalDashboard from "./pages/portal/PortalDashboard";
 import PortalPending from "./pages/portal/PortalPending";
@@ -38,6 +39,11 @@ import PortalApplications from "./pages/portal/PortalApplications";
 import PortalTeam from "./pages/portal/PortalTeam";
 import PortalBilling from "./pages/portal/PortalBilling";
 import PortalSettings from "./pages/portal/PortalSettings";
+import PortalProfile from "./pages/portal/PortalProfile";
+import PortalProfileSetup from "./pages/portal/PortalProfileSetup";
+import PortalProfilePreview from "./pages/portal/PortalProfilePreview";
+import PortalProfileSubmission from "./pages/portal/PortalProfileSubmission";
+import PortalProfileStatus from "./pages/portal/PortalProfileStatus";
 import TalentsLayout from "./components/talents/TalentsLayout";
 import TalentsDashboard from "./pages/talents/TalentsDashboard";
 import TalentsProfile from "./pages/talents/TalentsProfile";
@@ -87,6 +93,7 @@ const App = () => (
               <Route path="users" element={<AdminUsers />} />
               <Route path="subscriptions" element={<AdminSubscriptions />} />
               <Route path="categories" element={<AdminCategories />} />
+              <Route path="ngos/reviews" element={<AdminNGOReviews />} />
             </Route>
 
             {/* Portal (Entity) routes */}
@@ -107,6 +114,11 @@ const App = () => (
               <Route path="team" element={<PortalTeam />} />
               <Route path="billing" element={<PortalBilling />} />
               <Route path="settings" element={<PortalSettings />} />
+              <Route path="profile" element={<PortalProfile />} />
+              <Route path="profile/setup" element={<PortalProfileSetup />} />
+              <Route path="profile/preview" element={<PortalProfilePreview />} />
+              <Route path="profile/submission" element={<PortalProfileSubmission />} />
+              <Route path="profile/status" element={<PortalProfileStatus />} />
             </Route>
 
             {/* Talents routes */}

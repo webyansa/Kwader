@@ -41,19 +41,21 @@ const NGOProfile = () => {
       setLoading(true);
 
       // Try slug first, then id
-      let { data } = await supabase
+      const baseQuery = supabase
         .from("organizations")
-        .select("*")
+        .select("*") as any;
+      
+      let { data } = await baseQuery
         .eq("slug", slug)
         .eq("status", "active")
+        .eq("profile_status", "approved")
         .maybeSingle();
 
       if (!data) {
-        const res = await supabase
-          .from("organizations")
-          .select("*")
+        const res = await baseQuery
           .eq("id", slug)
           .eq("status", "active")
+          .eq("profile_status", "approved")
           .maybeSingle();
         data = res.data;
       }

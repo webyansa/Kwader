@@ -10,6 +10,7 @@ import {
 
 const mainItems = [
   { title: "لوحة التحكم", url: "/portal/dashboard", icon: LayoutDashboard },
+  { title: "ملف الجمعية", url: "/portal/profile", icon: Building2 },
   { title: "الوظائف", url: "/portal/jobs", icon: Briefcase },
   { title: "الطلبات الواردة", url: "/portal/applications", icon: FileText },
   { title: "الفريق", url: "/portal/team", icon: Users },

@@ -352,72 +352,123 @@ export type Database = {
       organizations: {
         Row: {
           address: string | null
+          benefits: string[] | null
           city: string | null
           created_at: string
           description: string | null
           email: string | null
+          founding_year: number | null
           id: string
           license_number: string | null
           logo_url: string | null
+          long_description: string | null
+          media_images: string[] | null
+          mission: string | null
           name_ar: string
           name_en: string | null
+          org_values: string[] | null
           owner_user_id: string | null
           phone: string | null
           plan_id: string | null
+          profile_completion: number
+          profile_status: Database["public"]["Enums"]["profile_status"]
+          programs: string[] | null
           region: string | null
+          short_description: string | null
           slug: string | null
           social_links: Json | null
           status: Database["public"]["Enums"]["org_status"]
+          subcategories: string[] | null
           subscription_end_date: string | null
           subscription_status: Database["public"]["Enums"]["org_status"]
+          supervisor_entity: string | null
           updated_at: string
+          video_url: string | null
+          vision: string | null
           website: string | null
+          why_work_with_us: string | null
+          work_environment: string | null
+          work_scope: string | null
         }
         Insert: {
           address?: string | null
+          benefits?: string[] | null
           city?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          founding_year?: number | null
           id?: string
           license_number?: string | null
           logo_url?: string | null
+          long_description?: string | null
+          media_images?: string[] | null
+          mission?: string | null
           name_ar: string
           name_en?: string | null
+          org_values?: string[] | null
           owner_user_id?: string | null
           phone?: string | null
           plan_id?: string | null
+          profile_completion?: number
+          profile_status?: Database["public"]["Enums"]["profile_status"]
+          programs?: string[] | null
           region?: string | null
+          short_description?: string | null
           slug?: string | null
           social_links?: Json | null
           status?: Database["public"]["Enums"]["org_status"]
+          subcategories?: string[] | null
           subscription_end_date?: string | null
           subscription_status?: Database["public"]["Enums"]["org_status"]
+          supervisor_entity?: string | null
           updated_at?: string
+          video_url?: string | null
+          vision?: string | null
           website?: string | null
+          why_work_with_us?: string | null
+          work_environment?: string | null
+          work_scope?: string | null
         }
         Update: {
           address?: string | null
+          benefits?: string[] | null
           city?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          founding_year?: number | null
           id?: string
           license_number?: string | null
           logo_url?: string | null
+          long_description?: string | null
+          media_images?: string[] | null
+          mission?: string | null
           name_ar?: string
           name_en?: string | null
+          org_values?: string[] | null
           owner_user_id?: string | null
           phone?: string | null
           plan_id?: string | null
+          profile_completion?: number
+          profile_status?: Database["public"]["Enums"]["profile_status"]
+          programs?: string[] | null
           region?: string | null
+          short_description?: string | null
           slug?: string | null
           social_links?: Json | null
           status?: Database["public"]["Enums"]["org_status"]
+          subcategories?: string[] | null
           subscription_end_date?: string | null
           subscription_status?: Database["public"]["Enums"]["org_status"]
+          supervisor_entity?: string | null
           updated_at?: string
+          video_url?: string | null
+          vision?: string | null
           website?: string | null
+          why_work_with_us?: string | null
+          work_environment?: string | null
+          work_scope?: string | null
         }
         Relationships: [
           {
@@ -488,6 +539,47 @@ export type Database = {
           urgent_count?: number
         }
         Relationships: []
+      }
+      profile_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: Database["public"]["Enums"]["profile_status"]
+          submitted_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["profile_status"]
+          submitted_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["profile_status"]
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -705,6 +797,12 @@ export type Database = {
         | "archived"
         | "suspended"
       org_status: "pending" | "active" | "suspended"
+      profile_status:
+        | "draft"
+        | "submitted"
+        | "changes_requested"
+        | "approved"
+        | "rejected"
       remote_type: "onsite" | "remote" | "hybrid"
     }
     CompositeTypes: {
@@ -866,6 +964,13 @@ export const Constants = {
         "suspended",
       ],
       org_status: ["pending", "active", "suspended"],
+      profile_status: [
+        "draft",
+        "submitted",
+        "changes_requested",
+        "approved",
+        "rejected",
+      ],
       remote_type: ["onsite", "remote", "hybrid"],
     },
   },
