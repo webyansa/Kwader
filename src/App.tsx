@@ -13,6 +13,14 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Forbidden from "./pages/Forbidden";
+import About from "./pages/About";
+import NGOsDirectory from "./pages/NGOsDirectory";
+import NGOProfile from "./pages/NGOProfile";
+import TalentsPublic from "./pages/TalentsPublic";
+import PortalLanding from "./pages/PortalLanding";
+import TalentsPortalLanding from "./pages/TalentsPortalLanding";
+import Pricing from "./pages/Pricing";
+import Contact from "./pages/Contact";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminJobs from "./pages/admin/AdminJobs";
@@ -54,6 +62,16 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/forbidden" element={<Forbidden />} />
+
+            {/* Public pages */}
+            <Route path="/about" element={<About />} />
+            <Route path="/ngos" element={<NGOsDirectory />} />
+            <Route path="/ngos/:slug" element={<NGOProfile />} />
+            <Route path="/talents-public" element={<TalentsPublic />} />
+            <Route path="/portal-landing" element={<PortalLanding />} />
+            <Route path="/talents-portal" element={<TalentsPortalLanding />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contact" element={<Contact />} />
 
             {/* Admin routes */}
             <Route path="/admin" element={

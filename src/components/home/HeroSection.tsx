@@ -26,14 +26,14 @@ const HeroSection = () => {
           </div>
 
           <h1 className="font-display text-4xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
-            وظائف القطاع
+            كوادر القطاع
             <span className="text-primary"> غير الربحي</span>
             <br />
             في مكان واحد
           </h1>
 
           <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            المنصة الأولى المتخصصة بتوظيف الكفاءات للجمعيات والمؤسسات الأهلية والأوقاف في السعودية والعالم العربي
+            المنصة الأولى المتخصصة بتمكين الكفاءات وربطها بالجمعيات والمؤسسات الأهلية والأوقاف في السعودية والعالم العربي
           </p>
 
           {/* Search Bar */}

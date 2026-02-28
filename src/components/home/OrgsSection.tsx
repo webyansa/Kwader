@@ -25,7 +25,7 @@ const OrgsSection = () => {
           {orgs.map((org) => (
             <Link
               key={org.id}
-              to={`/organizations/${org.id}`}
+              to={`/ngos/${org.id}`}
               className="group flex flex-col items-center gap-2"
             >
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card text-xl font-bold text-primary shadow-sm transition-all group-hover:shadow-md group-hover:border-primary/30">
@@ -39,7 +39,7 @@ const OrgsSection = () => {
         </div>
 
         <div className="mt-8 text-center">
-          <Link to="/organizations" className="text-sm font-medium text-primary hover:underline">
+          <Link to="/ngos" className="text-sm font-medium text-primary hover:underline">
             عرض جميع الجمعيات ←
           </Link>
         </div>
