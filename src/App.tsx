@@ -20,9 +20,20 @@ import AdminOrganizations from "./pages/admin/AdminOrganizations";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
-import OrgDashboard from "./pages/org/OrgDashboard";
-import OrgPending from "./pages/org/OrgPending";
-import JobSeekerDashboard from "./pages/job-seeker/JobSeekerDashboard";
+import PortalLayout from "./components/portal/PortalLayout";
+import PortalDashboard from "./pages/portal/PortalDashboard";
+import PortalPending from "./pages/portal/PortalPending";
+import PortalJobs from "./pages/portal/PortalJobs";
+import PortalNewJob from "./pages/portal/PortalNewJob";
+import PortalApplications from "./pages/portal/PortalApplications";
+import PortalTeam from "./pages/portal/PortalTeam";
+import PortalBilling from "./pages/portal/PortalBilling";
+import PortalSettings from "./pages/portal/PortalSettings";
+import TalentsLayout from "./components/talents/TalentsLayout";
+import TalentsDashboard from "./pages/talents/TalentsDashboard";
+import TalentsProfile from "./pages/talents/TalentsProfile";
+import TalentsApplications from "./pages/talents/TalentsApplications";
+import TalentsSettings from "./pages/talents/TalentsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,24 +69,37 @@ const App = () => (
               <Route path="categories" element={<AdminCategories />} />
             </Route>
 
-            {/* Organization routes */}
-            <Route path="/org/dashboard" element={
+            {/* Portal (Entity) routes */}
+            <Route path="/portal/pending" element={
               <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
-                <OrgDashboard />
+                <PortalPending />
               </ProtectedRoute>
             } />
-            <Route path="/org/pending" element={
+            <Route path="/portal" element={
               <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
-                <OrgPending />
+                <PortalLayout />
               </ProtectedRoute>
-            } />
+            }>
+              <Route path="dashboard" element={<PortalDashboard />} />
+              <Route path="jobs" element={<PortalJobs />} />
+              <Route path="jobs/new" element={<PortalNewJob />} />
+              <Route path="applications" element={<PortalApplications />} />
+              <Route path="team" element={<PortalTeam />} />
+              <Route path="billing" element={<PortalBilling />} />
+              <Route path="settings" element={<PortalSettings />} />
+            </Route>
 
-            {/* Job seeker routes */}
-            <Route path="/job-seeker/dashboard" element={
+            {/* Talents routes */}
+            <Route path="/talents" element={
               <ProtectedRoute allowedRoles={["job_seeker"]}>
-                <JobSeekerDashboard />
+                <TalentsLayout />
               </ProtectedRoute>
-            } />
+            }>
+              <Route path="dashboard" element={<TalentsDashboard />} />
+              <Route path="profile" element={<TalentsProfile />} />
+              <Route path="applications" element={<TalentsApplications />} />
+              <Route path="settings" element={<TalentsSettings />} />
+            </Route>
 
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LayoutDashboard, User, LogOut } from "lucide-react";
+import { LayoutDashboard, User, FileText, LogOut } from "lucide-react";
 import { isPlatformStaff, isOrganization, isJobSeeker } from "@/lib/roles";
 
 const UserMenu = () => {
@@ -23,9 +23,9 @@ const UserMenu = () => {
   const dashboardPath = isPlatformStaff(roles)
     ? "/admin"
     : isOrganization(roles)
-    ? "/org/dashboard"
+    ? "/portal/dashboard"
     : isJobSeeker(roles)
-    ? "/job-seeker/dashboard"
+    ? "/talents/dashboard"
     : "/";
 
   return (
@@ -44,12 +44,22 @@ const UserMenu = () => {
             لوحة التحكم
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            الملف الشخصي
-          </Link>
-        </DropdownMenuItem>
+        {isJobSeeker(roles) && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/talents/profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                الملف المهني
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/talents/applications" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                طلباتي
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 text-destructive">
           <LogOut className="h-4 w-4" />

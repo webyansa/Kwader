@@ -9,9 +9,6 @@ import UserMenu from "./UserMenu";
 const publicLinks = [
   { label: "الرئيسية", href: "/" },
   { label: "الوظائف", href: "/jobs" },
-  { label: "دليل الجمعيات", href: "/organizations" },
-  { label: "الأسعار", href: "/pricing" },
-  { label: "اتصل بنا", href: "/contact" },
 ];
 
 const Navbar = () => {
@@ -28,9 +25,9 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="font-display text-lg font-bold text-primary-foreground">و</span>
+            <span className="font-display text-lg font-bold text-primary-foreground">ك</span>
           </div>
-          <span className="font-display text-xl font-bold text-foreground">وظائف</span>
+          <span className="font-display text-xl font-bold text-foreground">كوادر</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -51,22 +48,22 @@ const Navbar = () => {
             <>
               {staff && (
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/admin">لوحة التحكم</Link>
+                  <Link to="/admin">لوحة تحكم المنصة</Link>
                 </Button>
               )}
               {org && (
                 <>
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/org/dashboard">لوحة الجمعية</Link>
+                    <Link to="/portal/dashboard">لوحة الكيانات</Link>
                   </Button>
                   <Button size="sm" asChild>
-                    <Link to="/org/dashboard">انشر وظيفة</Link>
+                    <Link to="/portal/jobs/new">نشر وظيفة</Link>
                   </Button>
                 </>
               )}
               {seeker && (
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/job-seeker/dashboard">طلباتي</Link>
+                  <Link to="/talents/dashboard">لوحة الكوادر</Link>
                 </Button>
               )}
               <UserMenu />
@@ -74,10 +71,13 @@ const Navbar = () => {
           ) : !loading ? (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">تسجيل الدخول</Link>
+                <Link to="/register?type=org">بوابة الكيانات</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/register?type=seeker">بوابة الكوادر</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/register">انشر وظيفة</Link>
+                <Link to="/login">تسجيل دخول</Link>
               </Button>
             </>
           ) : null}
@@ -108,28 +108,36 @@ const Navbar = () => {
               <>
                 {staff && (
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/admin" onClick={() => setMobileOpen(false)}>لوحة التحكم</Link>
+                    <Link to="/admin" onClick={() => setMobileOpen(false)}>لوحة تحكم المنصة</Link>
                   </Button>
                 )}
                 {org && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/org/dashboard" onClick={() => setMobileOpen(false)}>لوحة الجمعية</Link>
-                  </Button>
+                  <>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/portal/dashboard" onClick={() => setMobileOpen(false)}>لوحة الكيانات</Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link to="/portal/jobs/new" onClick={() => setMobileOpen(false)}>نشر وظيفة</Link>
+                    </Button>
+                  </>
                 )}
                 {seeker && (
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/job-seeker/dashboard" onClick={() => setMobileOpen(false)}>طلباتي</Link>
+                    <Link to="/talents/dashboard" onClick={() => setMobileOpen(false)}>لوحة الكوادر</Link>
                   </Button>
                 )}
                 <UserMenu />
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/login" onClick={() => setMobileOpen(false)}>تسجيل الدخول</Link>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/register?type=org" onClick={() => setMobileOpen(false)}>بوابة الكيانات</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/register?type=seeker" onClick={() => setMobileOpen(false)}>بوابة الكوادر</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/register" onClick={() => setMobileOpen(false)}>انشر وظيفة</Link>
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>تسجيل دخول</Link>
                 </Button>
               </>
             )}

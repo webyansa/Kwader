@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-const OrgPending = () => {
+const PortalPending = () => {
   const { signOut } = useAuth();
 
   return (
@@ -18,7 +18,7 @@ const OrgPending = () => {
           </div>
           <h1 className="font-display text-2xl font-bold text-foreground">طلبك قيد المراجعة</h1>
           <p className="text-muted-foreground">
-            تم استلام طلب تسجيل جمعيتك بنجاح. يقوم فريق الإدارة حالياً بمراجعة البيانات والتحقق من المعلومات.
+            تم استلام طلب تسجيل كيانك بنجاح. يقوم فريق الإدارة حالياً بمراجعة البيانات والتحقق من المعلومات.
           </p>
           <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -41,4 +41,4 @@ const OrgPending = () => {
   );
 };
 
-export default OrgPending;
+export default PortalPending;
