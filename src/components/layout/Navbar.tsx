@@ -1,19 +1,27 @@
 import { Link } from "react-router-dom";
-import { Search, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { isPlatformStaff, isOrganization, isJobSeeker } from "@/lib/roles";
+import UserMenu from "./UserMenu";
 
-const navLinks = [
+const publicLinks = [
   { label: "الرئيسية", href: "/" },
   { label: "الوظائف", href: "/jobs" },
   { label: "دليل الجمعيات", href: "/organizations" },
-  { label: "الخدمات", href: "/services" },
   { label: "الأسعار", href: "/pricing" },
   { label: "اتصل بنا", href: "/contact" },
 ];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, roles, loading } = useAuth();
+
+  const isLoggedIn = !!user;
+  const staff = isPlatformStaff(roles);
+  const org = isOrganization(roles);
+  const seeker = isJobSeeker(roles);
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
@@ -27,7 +35,7 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <div className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
+          {publicLinks.map((link) => (
             <Link
               key={link.href}
               to={link.href}
@@ -39,12 +47,40 @@ const Navbar = () => {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">تسجيل الدخول</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link to="/register">انشر وظيفة</Link>
-          </Button>
+          {!loading && isLoggedIn ? (
+            <>
+              {staff && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/admin">لوحة التحكم</Link>
+                </Button>
+              )}
+              {org && (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/org/dashboard">لوحة الجمعية</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link to="/org/dashboard">انشر وظيفة</Link>
+                  </Button>
+                </>
+              )}
+              {seeker && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/job-seeker/dashboard">طلباتي</Link>
+                </Button>
+              )}
+              <UserMenu />
+            </>
+          ) : !loading ? (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/login">تسجيل الدخول</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/register">انشر وظيفة</Link>
+              </Button>
+            </>
+          ) : null}
         </div>
 
         {/* Mobile toggle */}
@@ -57,7 +93,7 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="border-t bg-card p-4 md:hidden">
           <div className="flex flex-col gap-3">
-            {navLinks.map((link) => (
+            {publicLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
@@ -68,12 +104,35 @@ const Navbar = () => {
               </Link>
             ))}
             <hr className="my-2 border-border" />
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/login">تسجيل الدخول</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link to="/register">انشر وظيفة</Link>
-            </Button>
+            {isLoggedIn ? (
+              <>
+                {staff && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin" onClick={() => setMobileOpen(false)}>لوحة التحكم</Link>
+                  </Button>
+                )}
+                {org && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/org/dashboard" onClick={() => setMobileOpen(false)}>لوحة الجمعية</Link>
+                  </Button>
+                )}
+                {seeker && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/job-seeker/dashboard" onClick={() => setMobileOpen(false)}>طلباتي</Link>
+                  </Button>
+                )}
+                <UserMenu />
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>تسجيل الدخول</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/register" onClick={() => setMobileOpen(false)}>انشر وظيفة</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

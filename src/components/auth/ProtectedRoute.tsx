@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, roles, loading } = useAuth();
+  const { user, roles, status, loading } = useAuth();
 
   if (loading) {
     return (
@@ -22,8 +22,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   if (!user) return <Navigate to="/login" replace />;
 
+  if (status === "suspended") return <Navigate to="/forbidden" replace />;
+
   if (allowedRoles && !allowedRoles.some((r) => roles.includes(r))) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/forbidden" replace />;
   }
 
   return <>{children}</>;
