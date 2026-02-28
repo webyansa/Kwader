@@ -22,18 +22,18 @@ const footerLinks = {
 
 const Footer = () => {
   return (
-    <footer className="border-t bg-card">
-      <div className="container py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+    <footer className="border-t border-border/60 bg-card">
+      <div className="container py-14">
+        <div className="grid gap-10 md:grid-cols-4">
           {/* Brand */}
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+            <div className="mb-5 flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary shadow-sm">
                 <span className="font-display text-lg font-bold text-primary-foreground">ك</span>
               </div>
-              <span className="font-display text-xl font-bold">كوادر</span>
+              <span className="font-display text-xl font-bold tracking-tight">كوادر</span>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <p className="text-sm leading-relaxed text-muted-foreground max-w-xs">
               منصة التوظيف المتخصصة للقطاع غير الربحي في السعودية والعالم العربي.
               نربط الجمعيات والمؤسسات بأفضل الكفاءات.
             </p>
@@ -41,11 +41,11 @@ const Footer = () => {
 
           {/* Platform Links */}
           <div>
-            <h4 className="mb-4 font-display text-sm font-bold">المنصة</h4>
-            <ul className="space-y-2">
+            <h4 className="mb-4 font-display text-sm font-bold text-foreground">المنصة</h4>
+            <ul className="space-y-2.5">
               {footerLinks.platform.map((link) => (
                 <li key={link.href + link.label}>
-                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                     {link.label}
                   </Link>
                 </li>
@@ -55,11 +55,11 @@ const Footer = () => {
 
           {/* Portals */}
           <div>
-            <h4 className="mb-4 font-display text-sm font-bold">البوابات</h4>
-            <ul className="space-y-2">
+            <h4 className="mb-4 font-display text-sm font-bold text-foreground">البوابات</h4>
+            <ul className="space-y-2.5">
               {footerLinks.portals.map((link) => (
                 <li key={link.href + link.label}>
-                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                     {link.label}
                   </Link>
                 </li>
@@ -69,11 +69,11 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h4 className="mb-4 font-display text-sm font-bold">روابط مهمة</h4>
-            <ul className="space-y-2">
+            <h4 className="mb-4 font-display text-sm font-bold text-foreground">روابط مهمة</h4>
+            <ul className="space-y-2.5">
               {footerLinks.legal.map((link) => (
                 <li key={link.href + link.label}>
-                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                     {link.label}
                   </Link>
                 </li>
@@ -82,7 +82,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 border-t pt-6 text-center">
+        <div className="mt-12 border-t border-border/60 pt-6 text-center">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} منصة كوادر — توظيف القطاع غير الربحي. جميع الحقوق محفوظة.
           </p>

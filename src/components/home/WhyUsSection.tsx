@@ -25,23 +25,23 @@ const features = [
 
 const WhyUsSection = () => {
   return (
-    <section className="py-16">
+    <section className="py-20 bg-background">
       <div className="container">
-        <div className="mb-10 text-center">
-          <h2 className="font-display text-2xl font-bold">لماذا منصة وظائف؟</h2>
-          <p className="mt-2 text-sm text-muted-foreground">نوفر بيئة توظيف احترافية مصممة خصيصًا للقطاع غير الربحي</p>
+        <div className="mb-12 text-center">
+          <h2 className="font-display text-2xl font-bold tracking-tight">لماذا منصة كوادر؟</h2>
+          <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto">نوفر بيئة توظيف احترافية مصممة خصيصًا للقطاع غير الربحي</p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => {
             const Icon = f.icon;
             return (
-              <div key={f.title} className="text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-                  <Icon className="h-7 w-7 text-primary" />
+              <div key={f.title} className="group text-center rounded-2xl border border-border/60 bg-card p-7 shadow-card card-hover">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 transition-colors duration-200 group-hover:bg-accent/15">
+                  <Icon className="h-7 w-7 text-accent" />
                 </div>
-                <h3 className="font-display text-base font-bold">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                <h3 className="font-display text-base font-bold text-foreground">{f.title}</h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
               </div>
             );
           })}

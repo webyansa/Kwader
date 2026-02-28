@@ -25,48 +25,48 @@ const Navbar = () => {
   const seeker = isJobSeeker(roles);
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
+    <nav className="sticky top-0 z-50 border-b border-border/60 bg-card/90 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary shadow-sm">
             <span className="font-display text-lg font-bold text-primary-foreground">ك</span>
           </div>
-          <span className="font-display text-xl font-bold text-foreground">كوادر</span>
+          <span className="font-display text-xl font-bold text-foreground tracking-tight">كوادر</span>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden items-center gap-5 lg:flex">
+        <div className="hidden items-center gap-6 lg:flex">
           {publicLinks.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="text-[13px] font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
               {link.label}
             </Link>
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
           {!loading && isLoggedIn ? (
             <>
               {staff && (
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="rounded-xl" asChild>
                   <Link to="/admin">لوحة تحكم المنصة</Link>
                 </Button>
               )}
               {org && (
                 <>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" className="rounded-xl" asChild>
                     <Link to="/portal/dashboard">لوحة الكيانات</Link>
                   </Button>
-                  <Button size="sm" asChild>
+                  <Button size="sm" className="rounded-xl bg-accent text-accent-foreground hover:bg-accent/90" asChild>
                     <Link to="/portal/jobs/new">نشر وظيفة</Link>
                   </Button>
                 </>
               )}
               {seeker && (
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="rounded-xl" asChild>
                   <Link to="/talents/dashboard">لوحة الكوادر</Link>
                 </Button>
               )}
@@ -74,13 +74,13 @@ const Navbar = () => {
             </>
           ) : !loading ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" className="rounded-xl text-muted-foreground" asChild>
                 <Link to="/portal-landing">بوابة الكيانات</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" className="rounded-xl text-muted-foreground" asChild>
                 <Link to="/talents-portal">بوابة الكوادر</Link>
               </Button>
-              <Button size="sm" asChild>
+              <Button size="sm" className="rounded-xl" asChild>
                 <Link to="/login">تسجيل دخول</Link>
               </Button>
             </>
@@ -95,38 +95,38 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="border-t bg-card p-4 lg:hidden">
-          <div className="flex flex-col gap-3">
+        <div className="border-t border-border/60 bg-card p-4 lg:hidden animate-fade-in">
+          <div className="flex flex-col gap-2">
             {publicLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            <hr className="my-2 border-border" />
+            <hr className="my-2 border-border/60" />
             {isLoggedIn ? (
               <>
                 {staff && (
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" className="rounded-xl" asChild>
                     <Link to="/admin" onClick={() => setMobileOpen(false)}>لوحة تحكم المنصة</Link>
                   </Button>
                 )}
                 {org && (
                   <>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" className="rounded-xl" asChild>
                       <Link to="/portal/dashboard" onClick={() => setMobileOpen(false)}>لوحة الكيانات</Link>
                     </Button>
-                    <Button size="sm" asChild>
+                    <Button size="sm" className="rounded-xl" asChild>
                       <Link to="/portal/jobs/new" onClick={() => setMobileOpen(false)}>نشر وظيفة</Link>
                     </Button>
                   </>
                 )}
                 {seeker && (
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" className="rounded-xl" asChild>
                     <Link to="/talents/dashboard" onClick={() => setMobileOpen(false)}>لوحة الكوادر</Link>
                   </Button>
                 )}
@@ -134,13 +134,13 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="rounded-xl" asChild>
                   <Link to="/portal-landing" onClick={() => setMobileOpen(false)}>بوابة الكيانات</Link>
                 </Button>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="rounded-xl" asChild>
                   <Link to="/talents-portal" onClick={() => setMobileOpen(false)}>بوابة الكوادر</Link>
                 </Button>
-                <Button size="sm" asChild>
+                <Button size="sm" className="rounded-xl" asChild>
                   <Link to="/login" onClick={() => setMobileOpen(false)}>تسجيل دخول</Link>
                 </Button>
               </>

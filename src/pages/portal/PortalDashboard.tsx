@@ -1,23 +1,22 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Briefcase, Users, BarChart3, Edit, Send, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Sparkles, TrendingUp, Eye } from "lucide-react";
+import { Building2, Briefcase, Users, Edit, Send, AlertTriangle, CheckCircle2, Clock, Sparkles, TrendingUp, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const profileStatusConfig: Record<string, { label: string; icon: any; bgClass: string; textClass: string; borderClass: string }> = {
-  draft: { label: "مسودة – لم يُرسل بعد", icon: Edit, bgClass: "bg-muted/60", textClass: "text-muted-foreground", borderClass: "border-border" },
-  submitted: { label: "بانتظار مراجعة الإدارة", icon: Clock, bgClass: "bg-blue-50 dark:bg-blue-950/30", textClass: "text-blue-600 dark:text-blue-400", borderClass: "border-blue-200 dark:border-blue-800" },
-  changes_requested: { label: "مطلوب تعديلات", icon: AlertTriangle, bgClass: "bg-amber-50 dark:bg-amber-950/30", textClass: "text-amber-600 dark:text-amber-400", borderClass: "border-amber-200 dark:border-amber-800" },
-  approved: { label: "معتمد ✅", icon: CheckCircle2, bgClass: "bg-emerald-50 dark:bg-emerald-950/30", textClass: "text-emerald-600 dark:text-emerald-400", borderClass: "border-emerald-200 dark:border-emerald-800" },
-  rejected: { label: "مرفوض", icon: AlertTriangle, bgClass: "bg-red-50 dark:bg-red-950/30", textClass: "text-red-600 dark:text-red-400", borderClass: "border-red-200 dark:border-red-800" },
+  draft: { label: "مسودة – لم يُرسل بعد", icon: Edit, bgClass: "bg-secondary", textClass: "text-muted-foreground", borderClass: "border-border/60" },
+  submitted: { label: "بانتظار مراجعة الإدارة", icon: Clock, bgClass: "bg-highlight/10", textClass: "text-highlight", borderClass: "border-highlight/20" },
+  changes_requested: { label: "مطلوب تعديلات", icon: AlertTriangle, bgClass: "bg-featured/10", textClass: "text-featured", borderClass: "border-featured/20" },
+  approved: { label: "معتمد ✅", icon: CheckCircle2, bgClass: "bg-accent/10", textClass: "text-accent", borderClass: "border-accent/20" },
+  rejected: { label: "مرفوض", icon: AlertTriangle, bgClass: "bg-destructive/10", textClass: "text-destructive", borderClass: "border-destructive/20" },
 };
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
 
 const PortalDashboard = () => {
   const { user, orgId } = useAuth();
@@ -37,39 +36,49 @@ const PortalDashboard = () => {
   }, [orgId]);
 
   const stats = [
-    { label: "الوظائف المنشورة", value: "0", icon: Briefcase, iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { label: "الطلبات الواردة", value: "0", icon: Users, iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { label: "المشاهدات", value: "0", icon: Eye, iconBg: "bg-muted", iconColor: "text-muted-foreground" },
+    { label: "الوظائف المنشورة", value: "0", icon: Briefcase, iconBg: "bg-primary/8", iconColor: "text-primary" },
+    { label: "الطلبات الواردة", value: "0", icon: Users, iconBg: "bg-accent/8", iconColor: "text-accent" },
+    { label: "المشاهدات", value: "0", icon: Eye, iconBg: "bg-highlight/8", iconColor: "text-highlight" },
   ];
 
   const pCfg = profileStatusConfig[profileStatus] || profileStatusConfig.draft;
   const PIcon = pCfg.icon;
 
-  const completionColor = profileCompletion >= 80 ? "text-emerald-500" : profileCompletion >= 50 ? "text-amber-500" : "text-primary";
+  const completionRing = (size: number, strokeW: number, radius: number) => (
+    <svg className={`h-${size} w-${size} -rotate-90`} viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeW} />
+      <circle
+        cx="50" cy="50" r={radius} fill="none"
+        stroke="hsl(var(--accent))"
+        strokeWidth={strokeW}
+        strokeLinecap="round"
+        strokeDasharray={`${2 * Math.PI * radius}`}
+        strokeDashoffset={`${2 * Math.PI * radius * (1 - profileCompletion / 100)}`}
+        className="transition-all duration-700"
+      />
+    </svg>
+  );
 
   return (
-    <motion.div className="space-y-8" variants={container} initial="hidden" animate="show">
+    <motion.div className="space-y-7" variants={container} initial="hidden" animate="show">
       {/* Welcome */}
       <motion.div variants={item}>
-        <Card className="border-border/60 overflow-hidden">
+        <Card className="border-border/60 shadow-card overflow-hidden">
           <CardContent className="relative p-6 md:p-7">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
-            <div className="flex flex-col gap-1.5">
-              <h1 className="font-display text-2xl font-bold text-foreground">
-                أهلاً{orgName ? ` بـ${orgName}` : ""} 👋
-              </h1>
-              <p className="text-sm text-muted-foreground">لوحة تحكم حديثة لإدارة ملف الجمعية والوظائف بخطوات واضحة وسريعة</p>
-            </div>
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary via-accent to-highlight" />
+            <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">
+              أهلاً{orgName ? ` بـ${orgName}` : ""} 👋
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1.5">لوحة تحكم لإدارة ملف الجمعية والوظائف بخطوات واضحة وسريعة</p>
           </CardContent>
         </Card>
       </motion.div>
 
       {/* Profile Status Widget */}
       <motion.div variants={item}>
-        <Card className={`${pCfg.borderClass} border overflow-hidden`}>
+        <Card className={`${pCfg.borderClass} border shadow-card overflow-hidden`}>
           <CardContent className="p-0">
             <div className="flex flex-col sm:flex-row">
-              {/* Left: Status info */}
               <div className="flex-1 p-6 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${pCfg.bgClass}`}>
@@ -92,39 +101,30 @@ const PortalDashboard = () => {
 
                 <div className="flex flex-wrap gap-2">
                   {(profileStatus === "draft" || profileStatus === "changes_requested" || profileStatus === "approved") && (
-                    <Button size="sm" className="rounded-lg gap-1.5" asChild>
+                    <Button size="sm" className="rounded-xl gap-1.5" asChild>
                       <Link to="/portal/profile"><Edit className="h-3.5 w-3.5" /> {profileStatus === "approved" ? "تحديث الملف" : "تعديل الملف"}</Link>
                     </Button>
                   )}
                   {profileStatus === "changes_requested" && (
-                    <Button size="sm" variant="outline" className="rounded-lg" asChild>
+                    <Button size="sm" variant="outline" className="rounded-xl" asChild>
                       <Link to="/portal/profile/status">عرض الملاحظات</Link>
                     </Button>
                   )}
                   {profileStatus === "submitted" && (
-                    <Button size="sm" variant="outline" className="rounded-lg" asChild>
+                    <Button size="sm" variant="outline" className="rounded-xl" asChild>
                       <Link to="/portal/profile/status">تتبع المراجعة</Link>
                     </Button>
                   )}
                 </div>
               </div>
 
-              {/* Right: Completion ring */}
-              <div className="flex items-center justify-center p-6 sm:border-r border-t sm:border-t-0 border-border/50 sm:min-w-[180px]">
+              {/* Completion ring */}
+              <div className="flex items-center justify-center p-6 sm:border-r border-t sm:border-t-0 border-border/40 sm:min-w-[180px]">
                 <div className="relative flex flex-col items-center gap-2">
-                  <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
-                    <circle
-                      cx="50" cy="50" r="42" fill="none"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 42}`}
-                      strokeDashoffset={`${2 * Math.PI * 42 * (1 - profileCompletion / 100)}`}
-                      className={`${completionColor} transition-all duration-700`}
-                    />
-                  </svg>
-                  <span className={`absolute inset-0 flex items-center justify-center text-xl font-bold ${completionColor}`}>
+                  <div className="h-24 w-24">
+                    {completionRing(24, 5, 42)}
+                  </div>
+                  <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-accent">
                     {profileCompletion}%
                   </span>
                   <span className="text-[11px] text-muted-foreground">اكتمال الملف</span>
@@ -138,15 +138,15 @@ const PortalDashboard = () => {
       {/* Stats Grid */}
       <motion.div variants={item} className="grid gap-4 sm:grid-cols-3">
         {stats.map((stat) => (
-          <Card key={stat.label} className="group hover:shadow-md transition-shadow duration-300 border-border/60">
+          <Card key={stat.label} className="group border-border/60 shadow-card card-hover">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.iconBg}`}>
                   <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
-                <TrendingUp className="h-4 w-4 text-muted-foreground/30" />
+                <TrendingUp className="h-4 w-4 text-muted-foreground/20" />
               </div>
-              <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-3xl font-bold text-foreground tracking-tight">{stat.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
             </CardContent>
           </Card>
@@ -155,14 +155,14 @@ const PortalDashboard = () => {
 
       {/* Quick Actions */}
       <motion.div variants={item}>
-        <Card className="border-dashed border-border/60">
-          <CardContent className="flex flex-col items-center justify-center py-14 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 mb-5">
-              <Sparkles className="h-7 w-7 text-primary/60" />
+        <Card className="border-dashed border-border/60 shadow-card">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/8 mb-5">
+              <Sparkles className="h-7 w-7 text-accent/60" />
             </div>
             <h3 className="font-display text-lg font-bold text-foreground">ابدأ بنشر أول وظيفة</h3>
             <p className="text-sm text-muted-foreground mt-1.5 mb-6 max-w-sm">أضف وظائف جمعيتك للوصول إلى أفضل الكوادر المؤهلة في القطاع غير الربحي</p>
-            <Button className="rounded-lg gap-2" asChild>
+            <Button className="rounded-xl gap-2" asChild>
               <Link to="/portal/jobs/new">
                 <Briefcase className="h-4 w-4" /> نشر وظيفة جديدة
               </Link>
