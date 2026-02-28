@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, XCircle, AlertTriangle, Eye, MapPin, Mail, Globe } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle2, XCircle, AlertTriangle, Eye, MapPin, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 interface ReviewOrg {
   id: string;
@@ -64,7 +65,12 @@ const AdminNGOReviews = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchOrgs(); }, [filter]);
+  useEffect(() => { fetchOrgs(); }, []);
+
+  const filteredOrgs = filter === "all" ? orgs : orgs.filter((org) => org.profile_status === filter);
+  const submittedCount = orgs.filter((org) => org.profile_status === "submitted").length;
+  const changesCount = orgs.filter((org) => org.profile_status === "changes_requested").length;
+  const approvedCount = orgs.filter((org) => org.profile_status === "approved").length;
 
   const handleAction = async () => {
     if (!actionOrg || !user) return;
@@ -106,29 +112,38 @@ const AdminNGOReviews = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground">مراجعة ملفات الجمعيات</h1>
+    <motion.div className="space-y-6" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }}>
+      <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
+        <h1 className="font-display text-2xl font-bold text-foreground">مراجعة ملفات الجمعيات</h1>
+        <p className="text-sm text-muted-foreground mt-1">راجع الملفات المرسلة بسرعة، ثم اعتمد أو اطلب تعديلات مع ملاحظات واضحة.</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Card className="border-border/60"><CardContent className="p-4"><p className="text-xs text-muted-foreground">بانتظار المراجعة</p><p className="mt-1 text-2xl font-bold text-foreground">{submittedCount}</p></CardContent></Card>
+        <Card className="border-border/60"><CardContent className="p-4"><p className="text-xs text-muted-foreground">مطلوب تعديلات</p><p className="mt-1 text-2xl font-bold text-foreground">{changesCount}</p></CardContent></Card>
+        <Card className="border-border/60"><CardContent className="p-4"><p className="text-xs text-muted-foreground">ملفات معتمدة</p><p className="mt-1 text-2xl font-bold text-foreground">{approvedCount}</p></CardContent></Card>
+      </div>
 
       <Tabs value={filter} onValueChange={setFilter} dir="rtl">
-        <TabsList>
-          <TabsTrigger value="submitted">بانتظار المراجعة</TabsTrigger>
-          <TabsTrigger value="changes_requested">مطلوب تعديلات</TabsTrigger>
-          <TabsTrigger value="approved">معتمد</TabsTrigger>
-          <TabsTrigger value="rejected">مرفوض</TabsTrigger>
-          <TabsTrigger value="all">الكل</TabsTrigger>
+        <TabsList className="rounded-xl bg-muted/50 p-1 h-auto">
+          <TabsTrigger value="submitted" className="rounded-lg">بانتظار المراجعة</TabsTrigger>
+          <TabsTrigger value="changes_requested" className="rounded-lg">مطلوب تعديلات</TabsTrigger>
+          <TabsTrigger value="approved" className="rounded-lg">معتمد</TabsTrigger>
+          <TabsTrigger value="rejected" className="rounded-lg">مرفوض</TabsTrigger>
+          <TabsTrigger value="all" className="rounded-lg">الكل</TabsTrigger>
         </TabsList>
       </Tabs>
 
       {loading ? (
         <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-24 animate-pulse rounded-xl border bg-muted" />)}</div>
-      ) : orgs.length === 0 ? (
+      ) : filteredOrgs.length === 0 ? (
         <Card><CardContent className="py-10 text-center text-muted-foreground">لا توجد ملفات في هذه الحالة</CardContent></Card>
       ) : (
         <div className="space-y-3">
-          {orgs.map((org) => {
+          {filteredOrgs.map((org) => {
             const st = statusLabels[org.profile_status] || statusLabels.draft;
             return (
-              <Card key={org.id}>
+              <Card key={org.id} className="border-border/60 hover:shadow-sm transition-shadow duration-200">
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -227,7 +242,7 @@ const AdminNGOReviews = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 };
 

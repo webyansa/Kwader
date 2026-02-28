@@ -55,7 +55,7 @@ const PortalProfile = () => {
   const [newProgram, setNewProgram] = useState("");
   const [newBenefit, setNewBenefit] = useState("");
 
-  const editable = org?.profile_status === "draft" || org?.profile_status === "changes_requested";
+  const editable = org?.profile_status === "draft" || org?.profile_status === "changes_requested" || org?.profile_status === "approved";
 
   useEffect(() => {
     if (!orgId) return;
@@ -171,8 +171,18 @@ const PortalProfile = () => {
 
   const completionColor = completion >= 80 ? "text-emerald-500" : completion >= 50 ? "text-amber-500" : "text-primary";
 
+  const profileStatusMeta = {
+    draft: { label: "مسودة", badgeClass: "bg-muted text-muted-foreground", hint: "ابدأ بإكمال البيانات الأساسية" },
+    submitted: { label: "بانتظار المراجعة", badgeClass: "bg-primary/10 text-primary", hint: "ملفك الآن تحت المراجعة" },
+    changes_requested: { label: "مطلوب تعديلات", badgeClass: "bg-accent/15 text-accent-foreground", hint: "عدّل الملاحظات وأعد الإرسال" },
+    approved: { label: "معتمد", badgeClass: "bg-primary text-primary-foreground", hint: "ملفك ظاهر الآن في الدليل" },
+    rejected: { label: "مرفوض", badgeClass: "bg-destructive/10 text-destructive", hint: "تقدر تحدّث الملف وتعيد الإرسال" },
+  } as const;
+  const statusMeta = profileStatusMeta[(org.profile_status as keyof typeof profileStatusMeta)] ?? profileStatusMeta.draft;
+
   // Motivational micro-copy
   const getMicroCopy = () => {
+    if (org.profile_status === "approved") return "ملفك معتمد 👏 وأي تحديث جديد تقدر ترسله بسهولة";
     if (completion >= 90) return "ملفك يبدو ممتاز 🔥 خطوة أخيرة وتكون جاهز للاعتماد";
     if (completion >= 70) return "ملفك يبدو رائع 👌 أضف التفاصيل الناقصة لزيادة الثقة";
     if (completion >= 50) return "ماشي الحال ✨ كمّل بقية البيانات عشان تبرز جمعيتك";
@@ -267,12 +277,56 @@ const PortalProfile = () => {
         </CardContent>
       </Card>
 
+      <Card className="border-border/60 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="grid gap-0 md:grid-cols-[1fr_280px]">
+            <div className="p-5 md:p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge className={`${statusMeta.badgeClass} border-0 rounded-full px-3 py-1 text-xs font-medium`}>
+                  {statusMeta.label}
+                </Badge>
+                <span className="text-xs text-muted-foreground">{statusMeta.hint}</span>
+              </div>
+              <h2 className="font-display text-xl font-bold text-foreground">{org.name_ar || "اسم الجمعية"}</h2>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                {org.short_description || "أضف نبذة مختصرة تعرّف بعمل جمعيتك بشكل سريع وواضح."}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <span className="rounded-full bg-muted px-2.5 py-1">{org.region || "المنطقة"} • {org.city || "المدينة"}</span>
+                {org.email && <span className="rounded-full bg-muted px-2.5 py-1" dir="ltr">{org.email}</span>}
+              </div>
+            </div>
+            <div className="border-t md:border-t-0 md:border-r border-border/60 bg-muted/20 p-5">
+              <p className="text-xs font-medium text-foreground mb-2">نظرة سريعة قبل المراجعة</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background overflow-hidden">
+                  {logoPreview ? <img src={logoPreview} alt="شعار الجمعية" className="h-full w-full object-cover" /> : <Building2 className="h-5 w-5 text-muted-foreground" />}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{org.name_ar || "اسم الجمعية"}</p>
+                  <p className="text-[11px] text-muted-foreground">اكتمال الملف {completion}%</p>
+                </div>
+              </div>
+              {missing.length > 0 ? (
+                <div className="space-y-1.5">
+                  {missing.slice(0, 3).map((item) => (
+                    <p key={item} className="text-[11px] text-muted-foreground">• {item}</p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-primary">جاهز للإرسال للمراجعة ✅</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {!editable && (
-        <Card className={`border ${org.profile_status === "approved" ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20" : "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20"}`}>
+        <Card className={`border ${org.profile_status === "submitted" ? "border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20" : "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20"}`}>
           <CardContent className="p-4 text-sm">
             {org.profile_status === "submitted" ? "الملف قيد المراجعة من إدارة المنصة. لا يمكن التعديل حالياً ⏳" :
-             org.profile_status === "approved" ? "✅ الملف معتمد ومنشور في دليل الجمعيات" :
-             "تم رفض الملف. تواصل مع الإدارة للتفاصيل."}
+             org.profile_status === "rejected" ? "تم رفض الملف. راجع الملاحظات وعدّل الملف ثم أعد الإرسال." :
+             "هذا القسم متاح للتعديل بحسب حالة الملف الحالية."}
           </CardContent>
         </Card>
       )}
