@@ -233,7 +233,10 @@ export type Database = {
           salary_min: number | null
           salary_visible: boolean
           screening_questions: Json | null
+          short_id: string | null
           skills: string[] | null
+          slug_ar: string | null
+          slug_unique: string | null
           status: Database["public"]["Enums"]["job_status"]
           subcategory_id: string | null
           summary: string | null
@@ -276,7 +279,10 @@ export type Database = {
           salary_min?: number | null
           salary_visible?: boolean
           screening_questions?: Json | null
+          short_id?: string | null
           skills?: string[] | null
+          slug_ar?: string | null
+          slug_unique?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           subcategory_id?: string | null
           summary?: string | null
@@ -319,7 +325,10 @@ export type Database = {
           salary_min?: number | null
           salary_visible?: boolean
           screening_questions?: Json | null
+          short_id?: string | null
           skills?: string[] | null
+          slug_ar?: string | null
+          slug_unique?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           subcategory_id?: string | null
           summary?: string | null
@@ -769,6 +778,8 @@ export type Database = {
     }
     Functions: {
       approve_organization: { Args: { _org_id: string }; Returns: undefined }
+      generate_arabic_slug: { Args: { _title: string }; Returns: string }
+      generate_job_short_id: { Args: never; Returns: string }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {

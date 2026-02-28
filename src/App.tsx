@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { HelmetProvider } from "react-helmet-async";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
@@ -31,8 +32,10 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminNGOReviews from "./pages/admin/AdminNGOReviews";
+import AdminJobReview from "./pages/admin/AdminJobReview";
 import PortalLayout from "./components/portal/PortalLayout";
 import PortalDashboard from "./pages/portal/PortalDashboard";
+import PortalJobDetails from "./pages/portal/PortalJobDetails";
 import PortalPending from "./pages/portal/PortalPending";
 import PortalJobs from "./pages/portal/PortalJobs";
 import PortalNewJob from "./pages/portal/PortalNewJob";
@@ -55,6 +58,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
+  <HelmetProvider>
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -65,7 +69,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/jobs" element={<Jobs />} />
-              <Route path="/jobs/:id" element={<JobDetails />} />
+              <Route path="/jobs/:slug" element={<JobDetails />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/register/talent" element={<TalentRegister />} />
@@ -96,6 +100,7 @@ const App = () => (
                 <Route path="subscriptions" element={<AdminSubscriptions />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="ngos/reviews" element={<AdminNGOReviews />} />
+                <Route path="jobs/reviews/:id" element={<AdminJobReview />} />
               </Route>
 
               {/* Portal (Entity) routes */}
@@ -112,6 +117,8 @@ const App = () => (
                 <Route path="dashboard" element={<PortalDashboard />} />
                 <Route path="jobs" element={<PortalJobs />} />
                 <Route path="jobs/new" element={<PortalNewJob />} />
+                <Route path="jobs/:id" element={<PortalJobDetails />} />
+                <Route path="jobs/:id/edit" element={<PortalNewJob />} />
                 <Route path="applications" element={<PortalApplications />} />
                 <Route path="team" element={<PortalTeam />} />
                 <Route path="billing" element={<PortalBilling />} />
@@ -142,6 +149,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
+  </HelmetProvider>
 );
 
 export default App;
