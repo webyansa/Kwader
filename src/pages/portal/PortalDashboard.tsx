@@ -50,11 +50,18 @@ const PortalDashboard = () => {
   return (
     <motion.div className="space-y-8" variants={container} initial="hidden" animate="show">
       {/* Welcome */}
-      <motion.div variants={item} className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold text-foreground">
-          أهلاً{orgName ? ` بـ${orgName}` : ""} 👋
-        </h1>
-        <p className="text-sm text-muted-foreground">هنا تقدر تدير ملف جمعيتك وتنشر وظائفك وتتابع الطلبات</p>
+      <motion.div variants={item}>
+        <Card className="border-border/60 overflow-hidden">
+          <CardContent className="relative p-6 md:p-7">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+            <div className="flex flex-col gap-1.5">
+              <h1 className="font-display text-2xl font-bold text-foreground">
+                أهلاً{orgName ? ` بـ${orgName}` : ""} 👋
+              </h1>
+              <p className="text-sm text-muted-foreground">لوحة تحكم حديثة لإدارة ملف الجمعية والوظائف بخطوات واضحة وسريعة</p>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Profile Status Widget */}
@@ -84,9 +91,9 @@ const PortalDashboard = () => {
                 )}
 
                 <div className="flex flex-wrap gap-2">
-                  {(profileStatus === "draft" || profileStatus === "changes_requested") && (
+                  {(profileStatus === "draft" || profileStatus === "changes_requested" || profileStatus === "approved") && (
                     <Button size="sm" className="rounded-lg gap-1.5" asChild>
-                      <Link to="/portal/profile"><Edit className="h-3.5 w-3.5" /> تعديل الملف</Link>
+                      <Link to="/portal/profile"><Edit className="h-3.5 w-3.5" /> {profileStatus === "approved" ? "تحديث الملف" : "تعديل الملف"}</Link>
                     </Button>
                   )}
                   {profileStatus === "changes_requested" && (

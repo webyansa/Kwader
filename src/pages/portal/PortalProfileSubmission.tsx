@@ -39,7 +39,8 @@ const PortalProfileSubmission = () => {
 
   const allReady = checks.every(c => c.ok);
   const readyCount = checks.filter(c => c.ok).length;
-  const canSubmit = allReady && (org.profile_status === "draft" || org.profile_status === "changes_requested");
+  const canSubmit = allReady && ["draft", "changes_requested", "approved"].includes(org.profile_status);
+  const submitLabel = org.profile_status === "approved" ? "إرسال التحديث للمراجعة" : "إرسال الملف للمراجعة";
 
   const handleSubmit = async () => {
     if (!canSubmit || !orgId) return;
@@ -49,7 +50,7 @@ const PortalProfileSubmission = () => {
       if (updateError) throw updateError;
       const { error: reviewError } = await supabase.from("profile_reviews").insert({ organization_id: orgId, status: "submitted" } as any);
       if (reviewError) throw reviewError;
-      toast.success("تم إرسال الملف للمراجعة بنجاح 🎉");
+      toast.success(org.profile_status === "approved" ? "تم إرسال التحديث للمراجعة بنجاح 🎉" : "تم إرسال الملف للمراجعة بنجاح 🎉");
       navigate("/portal/profile/status");
     } catch (err: any) {
       toast.error(err.message);
@@ -111,9 +112,13 @@ const PortalProfileSubmission = () => {
 
       {canSubmit && allReady && (
         <div className="text-center pt-2">
-          <p className="mb-5 text-sm text-muted-foreground">بعد الإرسال، ستقوم إدارة المنصة بمراجعة الملف واعتماده أو طلب تعديلات</p>
+          <p className="mb-5 text-sm text-muted-foreground">
+            {org.profile_status === "approved"
+              ? "بعد الإرسال، يتم اعتماد النسخة الحالية لحين مراجعة التحديث الجديد من الإدارة"
+              : "بعد الإرسال، ستقوم إدارة المنصة بمراجعة الملف واعتماده أو طلب تعديلات"}
+          </p>
           <Button onClick={handleSubmit} disabled={submitting} size="lg" className="rounded-xl gap-2 px-8">
-            <Send className="h-4 w-4" /> إرسال الملف للمراجعة
+            <Send className="h-4 w-4" /> {submitLabel}
           </Button>
         </div>
       )}

@@ -83,7 +83,13 @@ const PortalProfileStatus = () => {
               </>
             )}
             {status === "approved" && (
-              <p className="text-sm text-muted-foreground">✅ ملفك معتمد ومنشور في دليل الجمعيات. يمكنك الآن نشر الوظائف</p>
+              <>
+                <p className="text-sm text-muted-foreground mb-4">✅ ملفك معتمد ومنشور في دليل الجمعيات، وتقدر تعدّل عليه بأي وقت وترسل التحديث للمراجعة.</p>
+                <div className="flex justify-center gap-2">
+                  <Button className="rounded-lg gap-1.5" asChild><Link to="/portal/profile"><Edit className="h-4 w-4" /> تعديل الملف</Link></Button>
+                  <Button variant="outline" className="rounded-lg gap-1.5" asChild><Link to="/portal/profile/submission"><Send className="h-4 w-4" /> إرسال تحديث</Link></Button>
+                </div>
+              </>
             )}
             {status === "rejected" && (
               <p className="text-sm text-red-600 dark:text-red-400">تم رفض الملف. تواصل مع إدارة المنصة لمزيد من التفاصيل</p>
