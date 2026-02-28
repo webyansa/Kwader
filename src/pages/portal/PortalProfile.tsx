@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Upload, Image, Eye, Send, Save, X, Plus } from "lucide-react";
+import { Building2, Upload, Image, Eye, Send, Save, X, Plus, Info, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const regions: Record<string, string[]> = {
   "الرياض": ["الرياض", "الخرج", "الدوادمي", "المجمعة"],
@@ -30,46 +30,18 @@ const regions: Record<string, string[]> = {
   "الجوف": ["سكاكا"],
 };
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  draft: { label: "مسودة", variant: "secondary" },
-  submitted: { label: "بانتظار المراجعة", variant: "default" },
-  changes_requested: { label: "مطلوب تعديلات", variant: "destructive" },
-  approved: { label: "معتمد", variant: "default" },
-  rejected: { label: "مرفوض", variant: "destructive" },
-};
-
 const workScopes = ["محلي", "وطني", "إقليمي", "دولي"];
 const workEnvironments = ["مكتبي", "هجين", "عن بعد", "ميداني"];
 
 interface OrgData {
-  id: string;
-  name_ar: string;
-  email: string | null;
-  phone: string | null;
-  logo_url: string | null;
-  region: string | null;
-  city: string | null;
-  address: string | null;
-  website: string | null;
-  description: string | null;
-  license_number: string | null;
-  profile_status: string;
-  short_description: string | null;
-  long_description: string | null;
-  vision: string | null;
-  mission: string | null;
-  org_values: string[];
-  programs: string[];
-  why_work_with_us: string | null;
-  work_environment: string | null;
-  benefits: string[];
-  supervisor_entity: string | null;
-  founding_year: number | null;
-  work_scope: string | null;
-  media_images: string[];
-  video_url: string | null;
-  profile_completion: number;
-  subcategories: string[];
+  id: string; name_ar: string; email: string | null; phone: string | null; logo_url: string | null;
+  region: string | null; city: string | null; address: string | null; website: string | null;
+  description: string | null; license_number: string | null; profile_status: string;
+  short_description: string | null; long_description: string | null; vision: string | null;
+  mission: string | null; org_values: string[]; programs: string[];
+  why_work_with_us: string | null; work_environment: string | null; benefits: string[];
+  supervisor_entity: string | null; founding_year: number | null; work_scope: string | null;
+  media_images: string[]; video_url: string | null; profile_completion: number; subcategories: string[];
 }
 
 const PortalProfile = () => {
@@ -141,7 +113,6 @@ const PortalProfile = () => {
         const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
         logoUrl = urlData.publicUrl;
       }
-
       const completion = calcCompletion({ ...org, logo_url: logoUrl });
       const updateData: Record<string, any> = {
         name_ar: org.name_ar, email: org.email, phone: org.phone,
@@ -157,11 +128,10 @@ const PortalProfile = () => {
         profile_completion: completion, subcategories: org.subcategories,
       };
       if (logoUrl) updateData.logo_url = logoUrl;
-
       const { error } = await supabase.from("organizations").update(updateData).eq("id", orgId);
       if (error) throw error;
       setOrg(prev => prev ? { ...prev, profile_completion: completion, logo_url: logoUrl } : prev);
-      toast.success("تم حفظ التعديلات");
+      toast.success("تم حفظ التعديلات بنجاح ✅");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -189,10 +159,7 @@ const PortalProfile = () => {
     return <div className="flex items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
   }
 
-  const st = statusLabels[org.profile_status] || statusLabels.draft;
   const completion = calcCompletion(org);
-
-  // Submission readiness check
   const missing: string[] = [];
   if (!org.logo_url && !logoFile) missing.push("شعار الجمعية");
   if (!org.short_description || org.short_description.length < 50) missing.push("نبذة مختصرة (50 حرف على الأقل)");
@@ -202,129 +169,179 @@ const PortalProfile = () => {
   if (!org.region || !org.city) missing.push("المنطقة والمدينة");
   if (!org.email) missing.push("البريد الرسمي");
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <Building2 className="h-7 w-7 text-primary" />
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">ملف الجمعية</h1>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant={st.variant}>{st.label}</Badge>
-              <span className="text-xs text-muted-foreground">اكتمال {completion}%</span>
-            </div>
-          </div>
+  const completionColor = completion >= 80 ? "text-emerald-500" : completion >= 50 ? "text-amber-500" : "text-primary";
+
+  // Motivational micro-copy
+  const getMicroCopy = () => {
+    if (completion >= 90) return "ملفك يبدو ممتاز 🔥 خطوة أخيرة وتكون جاهز للاعتماد";
+    if (completion >= 70) return "ملفك يبدو رائع 👌 أضف التفاصيل الناقصة لزيادة الثقة";
+    if (completion >= 50) return "ماشي الحال ✨ كمّل بقية البيانات عشان تبرز جمعيتك";
+    return "خلنا نبدأ 💪 كل معلومة تضيفها تقربك من الاعتماد";
+  };
+
+  const SectionTitle = ({ title, desc }: { title: string; desc?: string }) => (
+    <div className="mb-6">
+      <h3 className="text-base font-bold text-foreground">{title}</h3>
+      {desc && <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>}
+    </div>
+  );
+
+  const TagInput = ({ field, value, setter, placeholder, tags }: { field: "org_values" | "programs" | "benefits"; value: string; setter: (v: string) => void; placeholder: string; tags: string[] }) => (
+    <div>
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {tags.map((v, i) => (
+          <Badge key={i} variant="secondary" className="gap-1 rounded-full px-3 py-1 text-xs">
+            {v}
+            {editable && <X className="h-3 w-3 cursor-pointer opacity-50 hover:opacity-100 transition-opacity" onClick={() => removeTag(field, i)} />}
+          </Badge>
+        ))}
+      </div>
+      {editable && (
+        <div className="flex gap-2">
+          <Input value={value} onChange={e => setter(e.target.value)} placeholder={placeholder} className="max-w-xs rounded-lg" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag(field, value, setter))} />
+          <Button type="button" variant="outline" size="icon" className="rounded-lg shrink-0" onClick={() => addTag(field, value, setter)}>
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/portal/profile/preview"><Eye className="ml-1.5 h-3.5 w-3.5" /> معاينة</Link>
+      )}
+    </div>
+  );
+
+  return (
+    <motion.div className="space-y-6" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">ملف الجمعية</h1>
+          <p className="text-sm text-muted-foreground mt-1">{getMicroCopy()}</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="sm" className="rounded-lg gap-1.5" asChild>
+            <Link to="/portal/profile/preview"><Eye className="h-3.5 w-3.5" /> معاينة</Link>
           </Button>
           {editable && (
             <>
-              <Button variant="outline" size="sm" onClick={handleSave} disabled={saving}>
-                <Save className="ml-1.5 h-3.5 w-3.5" /> حفظ
+              <Button variant="outline" size="sm" className="rounded-lg gap-1.5" onClick={handleSave} disabled={saving}>
+                <Save className="h-3.5 w-3.5" /> حفظ
               </Button>
-              <Button size="sm" asChild disabled={missing.length > 0}>
-                <Link to="/portal/profile/submission"><Send className="ml-1.5 h-3.5 w-3.5" /> إرسال للمراجعة</Link>
+              <Button size="sm" className="rounded-lg gap-1.5" asChild disabled={missing.length > 0}>
+                <Link to="/portal/profile/submission"><Send className="h-3.5 w-3.5" /> إرسال للمراجعة</Link>
               </Button>
             </>
           )}
         </div>
       </div>
 
-      {/* Completion bar */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">نسبة اكتمال الملف</span>
-            <span className="font-bold text-primary">{completion}%</span>
-          </div>
-          <Progress value={completion} className="h-2" />
-          {missing.length > 0 && (
-            <div className="mt-3 rounded-lg bg-destructive/10 p-3">
-              <p className="text-xs font-medium text-destructive mb-1">مطلوب لإرسال الملف للمراجعة:</p>
-              <ul className="text-xs text-destructive/80 space-y-0.5">
-                {missing.map(m => <li key={m}>• {m}</li>)}
-              </ul>
+      {/* Completion + Missing */}
+      <Card className="border-border/60">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4">
+            <div className="relative shrink-0">
+              <svg className="h-16 w-16 -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="7" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 42}`}
+                  strokeDashoffset={`${2 * Math.PI * 42 * (1 - completion / 100)}`}
+                  className={`${completionColor} transition-all duration-700`}
+                />
+              </svg>
+              <span className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${completionColor}`}>{completion}%</span>
             </div>
-          )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">اكتمال الملف</p>
+              {missing.length > 0 ? (
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {missing.map(m => (
+                    <span key={m} className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 rounded-full px-2.5 py-0.5">
+                      <Info className="h-3 w-3" /> {m}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> جاهز للإرسال للمراجعة
+                </p>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {!editable && (
-        <Card className="border-amber-300 bg-amber-50 dark:bg-amber-900/20">
-          <CardContent className="py-3 text-sm text-amber-800 dark:text-amber-200">
-            {org.profile_status === "submitted" ? "الملف قيد المراجعة من إدارة المنصة. لا يمكن التعديل حالياً." : org.profile_status === "approved" ? "الملف معتمد ومنشور في دليل الجمعيات." : "تم رفض الملف. تواصل مع الإدارة للتفاصيل."}
+        <Card className={`border ${org.profile_status === "approved" ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20" : "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20"}`}>
+          <CardContent className="p-4 text-sm">
+            {org.profile_status === "submitted" ? "الملف قيد المراجعة من إدارة المنصة. لا يمكن التعديل حالياً ⏳" :
+             org.profile_status === "approved" ? "✅ الملف معتمد ومنشور في دليل الجمعيات" :
+             "تم رفض الملف. تواصل مع الإدارة للتفاصيل."}
           </CardContent>
         </Card>
       )}
 
-      {/* Tabbed sections */}
+      {/* Tabbed Sections */}
       <Tabs defaultValue="basic" dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="basic">الأساسية</TabsTrigger>
-          <TabsTrigger value="about">التعريف</TabsTrigger>
-          <TabsTrigger value="identity">الهوية</TabsTrigger>
-          <TabsTrigger value="work">ثقافة العمل</TabsTrigger>
-          <TabsTrigger value="governance">الحوكمة</TabsTrigger>
-          <TabsTrigger value="media">الوسائط</TabsTrigger>
+        <TabsList className="w-full justify-start rounded-xl bg-muted/50 p-1 h-auto flex-wrap gap-0.5">
+          <TabsTrigger value="basic" className="rounded-lg text-xs data-[state=active]:shadow-sm px-4 py-2">الأساسية</TabsTrigger>
+          <TabsTrigger value="about" className="rounded-lg text-xs data-[state=active]:shadow-sm px-4 py-2">التعريف</TabsTrigger>
+          <TabsTrigger value="identity" className="rounded-lg text-xs data-[state=active]:shadow-sm px-4 py-2">الهوية</TabsTrigger>
+          <TabsTrigger value="work" className="rounded-lg text-xs data-[state=active]:shadow-sm px-4 py-2">ثقافة العمل</TabsTrigger>
+          <TabsTrigger value="governance" className="rounded-lg text-xs data-[state=active]:shadow-sm px-4 py-2">الحوكمة</TabsTrigger>
+          <TabsTrigger value="media" className="rounded-lg text-xs data-[state=active]:shadow-sm px-4 py-2">الوسائط</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="basic">
-          <Card>
-            <CardHeader><CardTitle className="text-base">المعلومات الأساسية</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+        <TabsContent value="basic" className="mt-6">
+          <Card className="border-border/60">
+            <CardContent className="p-6 space-y-6">
+              <SectionTitle title="المعلومات الأساسية" desc="بيانات التواصل والموقع الجغرافي" />
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <Label>اسم الجمعية *</Label>
-                  <Input value={org.name_ar} onChange={e => setOrg({ ...org, name_ar: e.target.value })} disabled={!editable} className="mt-1.5" />
+                  <Label className="text-xs font-medium">اسم الجمعية *</Label>
+                  <Input value={org.name_ar} onChange={e => setOrg({ ...org, name_ar: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" />
                 </div>
                 <div>
-                  <Label>البريد الرسمي *</Label>
-                  <Input value={org.email || ""} onChange={e => setOrg({ ...org, email: e.target.value })} disabled={!editable} className="mt-1.5" dir="ltr" />
+                  <Label className="text-xs font-medium">البريد الرسمي *</Label>
+                  <Input value={org.email || ""} onChange={e => setOrg({ ...org, email: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" dir="ltr" />
                 </div>
                 <div>
-                  <Label>رقم الهاتف</Label>
-                  <Input value={org.phone || ""} onChange={e => setOrg({ ...org, phone: e.target.value })} disabled={!editable} className="mt-1.5" dir="ltr" />
+                  <Label className="text-xs font-medium">رقم الهاتف</Label>
+                  <Input value={org.phone || ""} onChange={e => setOrg({ ...org, phone: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" dir="ltr" />
                 </div>
                 <div>
-                  <Label>الموقع الإلكتروني</Label>
-                  <Input value={org.website || ""} onChange={e => setOrg({ ...org, website: e.target.value })} disabled={!editable} className="mt-1.5" dir="ltr" />
+                  <Label className="text-xs font-medium">الموقع الإلكتروني</Label>
+                  <Input value={org.website || ""} onChange={e => setOrg({ ...org, website: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" dir="ltr" />
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-5 sm:grid-cols-3">
                 <div>
-                  <Label>المنطقة *</Label>
+                  <Label className="text-xs font-medium">المنطقة *</Label>
                   <Select value={org.region || ""} onValueChange={v => setOrg({ ...org, region: v, city: "" })} disabled={!editable}>
-                    <SelectTrigger className="mt-1.5"><SelectValue placeholder="اختر" /></SelectTrigger>
+                    <SelectTrigger className="mt-1.5 rounded-lg"><SelectValue placeholder="اختر" /></SelectTrigger>
                     <SelectContent>{Object.keys(regions).map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 {org.region && (
                   <div>
-                    <Label>المدينة *</Label>
+                    <Label className="text-xs font-medium">المدينة *</Label>
                     <Select value={org.city || ""} onValueChange={v => setOrg({ ...org, city: v })} disabled={!editable}>
-                      <SelectTrigger className="mt-1.5"><SelectValue placeholder="اختر" /></SelectTrigger>
+                      <SelectTrigger className="mt-1.5 rounded-lg"><SelectValue placeholder="اختر" /></SelectTrigger>
                       <SelectContent>{regions[org.region]?.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                 )}
                 <div>
-                  <Label>العنوان</Label>
-                  <Input value={org.address || ""} onChange={e => setOrg({ ...org, address: e.target.value })} disabled={!editable} className="mt-1.5" />
+                  <Label className="text-xs font-medium">العنوان</Label>
+                  <Input value={org.address || ""} onChange={e => setOrg({ ...org, address: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" />
                 </div>
               </div>
               <div>
-                <Label>شعار الجمعية *</Label>
-                <div className="mt-1.5 flex items-center gap-4">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 overflow-hidden">
-                    {logoPreview ? <img src={logoPreview} alt="logo" className="h-full w-full object-cover" /> : <Image className="h-8 w-8 text-muted-foreground/50" />}
+                <Label className="text-xs font-medium">شعار الجمعية *</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-2 border-dashed border-border/80 bg-muted/30 overflow-hidden transition-colors hover:border-primary/30">
+                    {logoPreview ? <img src={logoPreview} alt="logo" className="h-full w-full object-cover" /> : <Image className="h-8 w-8 text-muted-foreground/30" />}
                   </div>
                   {editable && (
                     <label className="cursor-pointer">
                       <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                      <Button type="button" variant="outline" size="sm" asChild><span><Upload className="ml-1.5 h-3.5 w-3.5" /> رفع شعار</span></Button>
+                      <Button type="button" variant="outline" size="sm" className="rounded-lg gap-1.5" asChild><span><Upload className="h-3.5 w-3.5" /> رفع شعار</span></Button>
                     </label>
                   )}
                 </div>
@@ -333,130 +350,97 @@ const PortalProfile = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="about">
-          <Card>
-            <CardHeader><CardTitle className="text-base">التعريف</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
+        <TabsContent value="about" className="mt-6">
+          <Card className="border-border/60">
+            <CardContent className="p-6 space-y-6">
+              <SectionTitle title="التعريف" desc="اكتب نبذة عن جمعيتك بأسلوبك" />
               <div>
-                <Label>نبذة مختصرة * <span className="text-xs text-muted-foreground">(150-250 حرف)</span></Label>
-                <Textarea value={org.short_description || ""} onChange={e => setOrg({ ...org, short_description: e.target.value })} disabled={!editable} className="mt-1.5" maxLength={250} rows={3} />
-                <p className="mt-1 text-xs text-muted-foreground">{(org.short_description || "").length}/250</p>
+                <Label className="text-xs font-medium">نبذة مختصرة * <span className="text-muted-foreground">(150-250 حرف)</span></Label>
+                <Textarea value={org.short_description || ""} onChange={e => setOrg({ ...org, short_description: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" maxLength={250} rows={3} />
+                <p className="mt-1 text-[11px] text-muted-foreground">{(org.short_description || "").length}/250</p>
               </div>
               <div>
-                <Label>نبذة موسعة *</Label>
-                <Textarea value={org.long_description || ""} onChange={e => setOrg({ ...org, long_description: e.target.value })} disabled={!editable} className="mt-1.5" rows={8} />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="identity">
-          <Card>
-            <CardHeader><CardTitle className="text-base">الهوية</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>الرؤية *</Label>
-                <Textarea value={org.vision || ""} onChange={e => setOrg({ ...org, vision: e.target.value })} disabled={!editable} className="mt-1.5" rows={3} />
-              </div>
-              <div>
-                <Label>الرسالة *</Label>
-                <Textarea value={org.mission || ""} onChange={e => setOrg({ ...org, mission: e.target.value })} disabled={!editable} className="mt-1.5" rows={3} />
-              </div>
-              <div>
-                <Label>القيم</Label>
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {org.org_values.map((v, i) => (
-                    <Badge key={i} variant="secondary" className="gap-1">
-                      {v}
-                      {editable && <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag("org_values", i)} />}
-                    </Badge>
-                  ))}
-                </div>
-                {editable && (
-                  <div className="mt-2 flex gap-2">
-                    <Input value={newValue} onChange={e => setNewValue(e.target.value)} placeholder="أضف قيمة..." className="max-w-xs" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag("org_values", newValue, setNewValue))} />
-                    <Button type="button" variant="outline" size="sm" onClick={() => addTag("org_values", newValue, setNewValue)}><Plus className="h-3.5 w-3.5" /></Button>
-                  </div>
-                )}
-              </div>
-              <div>
-                <Label>البرامج والمبادرات</Label>
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {org.programs.map((v, i) => (
-                    <Badge key={i} variant="outline" className="gap-1">
-                      {v}
-                      {editable && <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag("programs", i)} />}
-                    </Badge>
-                  ))}
-                </div>
-                {editable && (
-                  <div className="mt-2 flex gap-2">
-                    <Input value={newProgram} onChange={e => setNewProgram(e.target.value)} placeholder="أضف برنامج..." className="max-w-xs" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag("programs", newProgram, setNewProgram))} />
-                    <Button type="button" variant="outline" size="sm" onClick={() => addTag("programs", newProgram, setNewProgram)}><Plus className="h-3.5 w-3.5" /></Button>
-                  </div>
-                )}
+                <Label className="text-xs font-medium">نبذة موسعة *</Label>
+                <Textarea value={org.long_description || ""} onChange={e => setOrg({ ...org, long_description: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" rows={8} />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="work">
-          <Card>
-            <CardHeader><CardTitle className="text-base">ثقافة العمل والتوظيف</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
+        <TabsContent value="identity" className="mt-6">
+          <Card className="border-border/60">
+            <CardContent className="p-6 space-y-6">
+              <SectionTitle title="الهوية" desc="الرؤية والرسالة والقيم" />
               <div>
-                <Label>لماذا العمل معنا؟</Label>
-                <Textarea value={org.why_work_with_us || ""} onChange={e => setOrg({ ...org, why_work_with_us: e.target.value })} disabled={!editable} className="mt-1.5" rows={4} />
+                <Label className="text-xs font-medium">الرؤية *</Label>
+                <Textarea value={org.vision || ""} onChange={e => setOrg({ ...org, vision: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" rows={3} />
               </div>
               <div>
-                <Label>بيئة العمل</Label>
+                <Label className="text-xs font-medium">الرسالة *</Label>
+                <Textarea value={org.mission || ""} onChange={e => setOrg({ ...org, mission: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" rows={3} />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">القيم</Label>
+                <div className="mt-2">
+                  <TagInput field="org_values" value={newValue} setter={setNewValue} placeholder="أضف قيمة..." tags={org.org_values} />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs font-medium">البرامج والمبادرات</Label>
+                <div className="mt-2">
+                  <TagInput field="programs" value={newProgram} setter={setNewProgram} placeholder="أضف برنامج..." tags={org.programs} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="work" className="mt-6">
+          <Card className="border-border/60">
+            <CardContent className="p-6 space-y-6">
+              <SectionTitle title="ثقافة العمل والتوظيف" desc="اعرض بيئة العمل ومزاياها" />
+              <div>
+                <Label className="text-xs font-medium">لماذا العمل معنا؟</Label>
+                <Textarea value={org.why_work_with_us || ""} onChange={e => setOrg({ ...org, why_work_with_us: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" rows={4} />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">بيئة العمل</Label>
                 <Select value={org.work_environment || ""} onValueChange={v => setOrg({ ...org, work_environment: v })} disabled={!editable}>
-                  <SelectTrigger className="mt-1.5 max-w-xs"><SelectValue placeholder="اختر" /></SelectTrigger>
+                  <SelectTrigger className="mt-1.5 max-w-xs rounded-lg"><SelectValue placeholder="اختر" /></SelectTrigger>
                   <SelectContent>{workEnvironments.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>المزايا</Label>
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {org.benefits.map((v, i) => (
-                    <Badge key={i} variant="secondary" className="gap-1">
-                      {v}
-                      {editable && <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag("benefits", i)} />}
-                    </Badge>
-                  ))}
+                <Label className="text-xs font-medium">المزايا</Label>
+                <div className="mt-2">
+                  <TagInput field="benefits" value={newBenefit} setter={setNewBenefit} placeholder="أضف ميزة..." tags={org.benefits} />
                 </div>
-                {editable && (
-                  <div className="mt-2 flex gap-2">
-                    <Input value={newBenefit} onChange={e => setNewBenefit(e.target.value)} placeholder="أضف ميزة..." className="max-w-xs" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag("benefits", newBenefit, setNewBenefit))} />
-                    <Button type="button" variant="outline" size="sm" onClick={() => addTag("benefits", newBenefit, setNewBenefit)}><Plus className="h-3.5 w-3.5" /></Button>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="governance">
-          <Card>
-            <CardHeader><CardTitle className="text-base">بيانات الحوكمة</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+        <TabsContent value="governance" className="mt-6">
+          <Card className="border-border/60">
+            <CardContent className="p-6 space-y-6">
+              <SectionTitle title="بيانات الحوكمة" desc="معلومات اختيارية تعزز مصداقية جمعيتك" />
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <Label>رقم الترخيص</Label>
-                  <Input value={org.license_number || ""} onChange={e => setOrg({ ...org, license_number: e.target.value })} disabled={!editable} className="mt-1.5" dir="ltr" />
+                  <Label className="text-xs font-medium">رقم الترخيص</Label>
+                  <Input value={org.license_number || ""} onChange={e => setOrg({ ...org, license_number: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" dir="ltr" />
                 </div>
                 <div>
-                  <Label>جهة الإشراف</Label>
-                  <Input value={org.supervisor_entity || ""} onChange={e => setOrg({ ...org, supervisor_entity: e.target.value })} disabled={!editable} className="mt-1.5" />
+                  <Label className="text-xs font-medium">جهة الإشراف</Label>
+                  <Input value={org.supervisor_entity || ""} onChange={e => setOrg({ ...org, supervisor_entity: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" />
                 </div>
                 <div>
-                  <Label>سنة التأسيس</Label>
-                  <Input type="number" value={org.founding_year || ""} onChange={e => setOrg({ ...org, founding_year: parseInt(e.target.value) || null })} disabled={!editable} className="mt-1.5" dir="ltr" />
+                  <Label className="text-xs font-medium">سنة التأسيس</Label>
+                  <Input type="number" value={org.founding_year || ""} onChange={e => setOrg({ ...org, founding_year: parseInt(e.target.value) || null })} disabled={!editable} className="mt-1.5 rounded-lg" dir="ltr" />
                 </div>
                 <div>
-                  <Label>نطاق العمل</Label>
+                  <Label className="text-xs font-medium">نطاق العمل</Label>
                   <Select value={org.work_scope || ""} onValueChange={v => setOrg({ ...org, work_scope: v })} disabled={!editable}>
-                    <SelectTrigger className="mt-1.5"><SelectValue placeholder="اختر" /></SelectTrigger>
+                    <SelectTrigger className="mt-1.5 rounded-lg"><SelectValue placeholder="اختر" /></SelectTrigger>
                     <SelectContent>{workScopes.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -465,13 +449,13 @@ const PortalProfile = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="media">
-          <Card>
-            <CardHeader><CardTitle className="text-base">الوسائط</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
+        <TabsContent value="media" className="mt-6">
+          <Card className="border-border/60">
+            <CardContent className="p-6 space-y-6">
+              <SectionTitle title="الوسائط" desc="أضف صور وفيديو يعكسون هوية جمعيتك" />
               <div>
-                <Label>فيديو تعريفي (رابط YouTube)</Label>
-                <Input value={org.video_url || ""} onChange={e => setOrg({ ...org, video_url: e.target.value })} disabled={!editable} className="mt-1.5" dir="ltr" placeholder="https://youtube.com/watch?v=..." />
+                <Label className="text-xs font-medium">فيديو تعريفي (رابط YouTube)</Label>
+                <Input value={org.video_url || ""} onChange={e => setOrg({ ...org, video_url: e.target.value })} disabled={!editable} className="mt-1.5 rounded-lg" dir="ltr" placeholder="https://youtube.com/watch?v=..." />
               </div>
               <p className="text-xs text-muted-foreground">يمكنك إضافة صور لاحقاً من خلال ميزة رفع الوسائط</p>
             </CardContent>
@@ -480,14 +464,18 @@ const PortalProfile = () => {
       </Tabs>
 
       {editable && (
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleSave} disabled={saving}><Save className="ml-1.5 h-4 w-4" /> حفظ المسودة</Button>
+        <div className="flex justify-end gap-2 pb-4">
+          <Button variant="outline" className="rounded-lg gap-1.5" onClick={handleSave} disabled={saving}>
+            <Save className="h-4 w-4" /> حفظ المسودة
+          </Button>
           {missing.length === 0 && (
-            <Button asChild><Link to="/portal/profile/submission"><Send className="ml-1.5 h-4 w-4" /> إرسال للمراجعة</Link></Button>
+            <Button className="rounded-lg gap-1.5" asChild>
+              <Link to="/portal/profile/submission"><Send className="h-4 w-4" /> إرسال للمراجعة</Link>
+            </Button>
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
