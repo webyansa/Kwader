@@ -30,8 +30,8 @@ export const hasRole = (roles: AppRole[], role: AppRole) =>
 
 export const getRedirectPath = (roles: AppRole[]): string => {
   if (isPlatformStaff(roles)) return "/admin";
-  if (isOrganization(roles)) return "/org/dashboard";
-  if (isJobSeeker(roles)) return "/jobs";
+  if (isOrganization(roles)) return "/portal/dashboard";
+  if (isJobSeeker(roles)) return "/talents/dashboard";
   return "/";
 };
 

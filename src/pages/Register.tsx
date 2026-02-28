@@ -24,7 +24,7 @@ interface Plan {
   seats: number;
 }
 
-const STEP_LABELS_ORG = ["بيانات الجمعية", "بيانات مسؤول الحساب", "اختيار الباقة"];
+const STEP_LABELS_ORG = ["بيانات الكيان", "بيانات مسؤول الحساب", "اختيار الباقة"];
 
 const Register = () => {
   const [step, setStep] = useState<"choose" | "form" | "success">("choose");
@@ -89,7 +89,7 @@ const Register = () => {
     }
 
     setLoading(false);
-    navigate("/jobs");
+    navigate("/talents/profile");
   };
 
   const handleOrgRegister = async () => {
@@ -150,7 +150,7 @@ const Register = () => {
             </div>
             <h1 className="font-display text-2xl font-bold text-foreground">تم استلام طلبك بنجاح!</h1>
             <p className="text-muted-foreground">
-              شكرًا لتسجيلك. سيتم مراجعة طلب تسجيل جمعيتك من قبل فريق الإدارة وتفعيل حسابك في أقرب وقت.
+              شكرًا لتسجيلك. سيتم مراجعة طلب تسجيل كيانك من قبل فريق الإدارة وتفعيل حسابك في أقرب وقت.
             </p>
             <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
               <p>ستصلك رسالة على بريدك الإلكتروني عند تفعيل الحساب.</p>
@@ -184,8 +184,8 @@ const Register = () => {
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
                   <User className="h-7 w-7 text-primary" />
                 </div>
-                <span className="font-display text-lg font-semibold text-foreground">باحث عن وظيفة</span>
-                <span className="text-xs text-muted-foreground">تصفح الوظائف وتقدم لها مباشرة — مجاناً</span>
+                 <span className="font-display text-lg font-semibold text-foreground">حساب كوادر</span>
+                <span className="text-xs text-muted-foreground">أنشئ ملفك المهني وتقدم للوظائف — مجاناً</span>
               </button>
               <button
                 onClick={() => { setAccountType("org"); setStep("form"); setOrgStep(1); }}
@@ -194,7 +194,7 @@ const Register = () => {
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 transition-colors group-hover:bg-accent/20">
                   <Building2 className="h-7 w-7 text-accent" />
                 </div>
-                <span className="font-display text-lg font-semibold text-foreground">جمعية / مؤسسة</span>
+                <span className="font-display text-lg font-semibold text-foreground">حساب كيان</span>
                 <span className="text-xs text-muted-foreground">انشر وظائف وأدر فريق التوظيف</span>
               </button>
             </div>
@@ -217,8 +217,8 @@ const Register = () => {
         <main className="flex flex-1 items-center justify-center px-4 py-16">
           <div className="w-full max-w-lg space-y-6 rounded-xl border bg-card p-8 shadow-sm">
             <div className="text-center">
-              <h1 className="font-display text-2xl font-bold text-foreground">تسجيل باحث عن وظيفة</h1>
-              <p className="mt-2 text-sm text-muted-foreground">أنشئ حسابك المجاني وابدأ البحث</p>
+               <h1 className="font-display text-2xl font-bold text-foreground">إنشاء حساب كوادر</h1>
+              <p className="mt-2 text-sm text-muted-foreground">أنشئ ملفك المهني وابدأ رحلتك المهنية</p>
               <button onClick={() => setStep("choose")} className="mt-1 text-xs text-primary hover:underline">← تغيير نوع الحساب</button>
             </div>
             <form onSubmit={handleSeekerRegister} className="space-y-4">
@@ -262,7 +262,7 @@ const Register = () => {
         <div className="w-full max-w-2xl space-y-6 rounded-xl border bg-card p-8 shadow-sm">
           {/* Stepper */}
           <div className="text-center">
-            <h1 className="font-display text-2xl font-bold text-foreground">تسجيل جمعية جديدة</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">تسجيل كيان جديد</h1>
             <button onClick={() => setStep("choose")} className="mt-1 text-xs text-primary hover:underline">← تغيير نوع الحساب</button>
           </div>
 
@@ -289,7 +289,7 @@ const Register = () => {
           {orgStep === 1 && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="orgName">اسم الجهة بالعربية *</Label>
+                <Label htmlFor="orgName">اسم الكيان بالعربية *</Label>
                 <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} required maxLength={200} />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -406,7 +406,7 @@ const Register = () => {
                   <ArrowRight className="ml-2 h-4 w-4" /> السابق
                 </Button>
                 <Button onClick={handleOrgRegister} disabled={loading || !selectedPlanId}>
-                  {loading ? "جارٍ التسجيل..." : "تسجيل الجمعية"}
+                  {loading ? "جارٍ التسجيل..." : "تسجيل الكيان"}
                 </Button>
               </div>
             </div>

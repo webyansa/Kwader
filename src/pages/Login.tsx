@@ -73,16 +73,27 @@ const Login = () => {
         .single();
 
       if (sub?.status === "active") {
-        navigate("/org/dashboard");
+        navigate("/portal/dashboard");
       } else {
-        navigate("/org/pending");
+        navigate("/portal/pending");
       }
       return;
     }
 
-    // Job seeker
+    // Talent (job seeker) - check profile completion
     if (isJobSeeker(userRoles)) {
-      navigate("/jobs");
+      const { data: talentProfile } = await supabase
+        .from("job_seeker_profiles")
+        .select("profile_completion_percentage")
+        .eq("user_id", data.user.id)
+        .single();
+
+      const completion = (talentProfile as any)?.profile_completion_percentage ?? 0;
+      if (completion < 50) {
+        navigate("/talents/profile");
+      } else {
+        navigate("/talents/dashboard");
+      }
       return;
     }
 

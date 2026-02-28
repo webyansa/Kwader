@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, Building2, FolderTree, Users, CreditCard, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Briefcase, FileText, Users, CreditCard, Settings, LogOut, Building2 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,15 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainItems = [
-  { title: "نظرة عامة", url: "/admin", icon: LayoutDashboard },
-  { title: "إدارة الوظائف", url: "/admin/jobs", icon: Briefcase },
-  { title: "إدارة الكيانات", url: "/admin/organizations", icon: Building2 },
-  { title: "المستخدمين", url: "/admin/users", icon: Users },
-  { title: "طلبات الاشتراك", url: "/admin/subscriptions", icon: CreditCard },
-  { title: "التصنيفات", url: "/admin/categories", icon: FolderTree },
+  { title: "لوحة التحكم", url: "/portal/dashboard", icon: LayoutDashboard },
+  { title: "الوظائف", url: "/portal/jobs", icon: Briefcase },
+  { title: "الطلبات الواردة", url: "/portal/applications", icon: FileText },
+  { title: "الفريق", url: "/portal/team", icon: Users },
+  { title: "الاشتراك والفواتير", url: "/portal/billing", icon: CreditCard },
+  { title: "الإعدادات", url: "/portal/settings", icon: Settings },
 ];
 
-const AdminSidebar = () => {
+const PortalSidebar = () => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { signOut } = useAuth();
@@ -27,12 +27,12 @@ const AdminSidebar = () => {
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Shield className="h-5 w-5" />
+            <Building2 className="h-5 w-5" />
           </div>
           {!collapsed && (
             <div>
-              <p className="text-sm font-bold text-foreground">لوحة التحكم</p>
-              <p className="text-[10px] text-muted-foreground">إدارة المنصة</p>
+              <p className="text-sm font-bold text-foreground">بوابة الكيانات</p>
+              <p className="text-[10px] text-muted-foreground">إدارة التوظيف</p>
             </div>
           )}
         </div>
@@ -45,7 +45,7 @@ const AdminSidebar = () => {
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === "/admin"} className="hover:bg-sidebar-accent/50 transition-colors" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                    <NavLink to={item.url} end={item.url === "/portal/dashboard"} className="hover:bg-sidebar-accent/50 transition-colors" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
                       <item.icon className="ml-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -67,4 +67,4 @@ const AdminSidebar = () => {
   );
 };
 
-export default AdminSidebar;
+export default PortalSidebar;
