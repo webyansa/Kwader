@@ -12,7 +12,9 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   FileText, Download, Image as ImageIcon, Sparkles, Wand2, QrCode, Eye, Palette,
   Briefcase, GraduationCap, Award, MapPin, Mail, Phone, Linkedin, Globe, Star, Heart,
+  ArrowLeftFromLine,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TEMPLATES = [
   { id: "classic", name: "كلاسيكي", color: "bg-primary/10 border-primary/30" },
@@ -29,6 +31,7 @@ const AI_ACTIONS = [
 const TalentsCVStudio = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const cvRef = useRef<HTMLDivElement>(null);
   const [template, setTemplate] = useState("classic");
   const [aiProvider, setAiProvider] = useState("gemini");
@@ -36,6 +39,49 @@ const TalentsCVStudio = () => {
   const [aiResult, setAiResult] = useState<string>("");
   const [aiAction, setAiAction] = useState<string>("");
   const [exporting, setExporting] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+
+  const MIGRATE_LABELS: Record<string, { label: string; icon: typeof Star }> = {
+    summary: { label: "ترحيل إلى النبذة المهنية", icon: Star },
+    achievements: { label: "ترحيل إلى الخبرات (إنجازات)", icon: Briefcase },
+    skills: { label: "ترحيل إلى المهارات", icon: Award },
+  };
+
+  const handleMigrate = async () => {
+    if (!user || !aiResult || !aiAction) return;
+    setMigrating(true);
+    try {
+      let updatePayload: Record<string, any> = {};
+
+      if (aiAction === "summary") {
+        updatePayload = { summary: aiResult };
+      } else if (aiAction === "skills") {
+        const skillsArr = aiResult.split(/[،,]/).map(s => s.trim()).filter(Boolean);
+        updatePayload = { skills: skillsArr };
+      } else if (aiAction === "achievements") {
+        // Append as a new experience entry with AI-generated achievements
+        const currentExps = ((profile as any)?.experiences as any[]) || [];
+        const newExp = { title: "إنجازات (مولّدة بالذكاء الاصطناعي)", company: "", period: "", description: aiResult };
+        updatePayload = { experiences: [...currentExps, newExp] };
+      }
+
+      const { error } = await supabase
+        .from("job_seeker_profiles")
+        .update(updatePayload as any)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["talent-profile-cv", user.id] });
+      toast({ title: "تم الترحيل بنجاح ✅", description: "تم حفظ المحتوى في ملفك المهني" });
+      setAiResult("");
+      setAiAction("");
+    } catch (e: any) {
+      toast({ title: "خطأ في الترحيل", description: e.message, variant: "destructive" });
+    } finally {
+      setMigrating(false);
+    }
+  };
 
   const { data: profile } = useQuery({
     queryKey: ["talent-profile-cv", user?.id],
@@ -184,10 +230,21 @@ const TalentsCVStudio = () => {
                 ))}
               </div>
               {aiResult && (
-                <div className="rounded-xl border bg-secondary/50 p-3 space-y-2">
+                <div className="rounded-xl border bg-secondary/50 p-3 space-y-3">
                   <p className="text-xs font-bold text-foreground">النتيجة:</p>
                   <Textarea value={aiResult} onChange={e => setAiResult(e.target.value)} rows={5} className="text-sm" />
-                  <p className="text-xs text-muted-foreground">عدّل النص ثم احفظه من صفحة الملف المهني</p>
+                  {MIGRATE_LABELS[aiAction] && (
+                    <Button
+                      size="sm"
+                      className="w-full gap-2 rounded-xl"
+                      onClick={handleMigrate}
+                      disabled={migrating}
+                    >
+                      <ArrowLeftFromLine className="h-4 w-4" />
+                      {migrating ? "جارٍ الترحيل..." : MIGRATE_LABELS[aiAction].label}
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">عدّل النص ثم رحّله لملفك المهني أو احفظه يدوياً</p>
                 </div>
               )}
             </CardContent>
