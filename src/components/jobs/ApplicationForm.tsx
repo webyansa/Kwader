@@ -71,14 +71,21 @@ const ApplicationForm = ({ jobId }: ApplicationFormProps) => {
       cvUrl = path;
     }
 
-    const { error } = await supabase.from("applications").insert({
+    const { error } = await supabase.from("job_applications").insert([{
       job_id: jobId,
+      applicant_type: "guest",
+      created_by_user_id: crypto.randomUUID(),
       full_name: result.data.full_name,
       email: result.data.email,
+      guest_full_name: result.data.full_name,
+      guest_email: result.data.email,
+      guest_mobile: result.data.phone || null,
       phone: result.data.phone || null,
       cover_letter: result.data.cover_letter || null,
+      cover_message: result.data.cover_letter || null,
       cv_file_url: cvUrl,
-    });
+      source: "web",
+    }]);
 
     setLoading(false);
     if (error) {
