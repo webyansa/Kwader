@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { HelmetProvider } from "react-helmet-async";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import SectorJobs from "./pages/SectorJobs";
+import ApplyJob from "./pages/ApplyJob";
 import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import Login from "./pages/Login";
@@ -70,6 +72,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/jobs/:slug" element={<JobDetails />} />
+              <Route path="/jobs/:slug/apply" element={<ApplyJob />} />
+              <Route path="/sector-jobs" element={<SectorJobs />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/register/talent" element={<TalentRegister />} />
