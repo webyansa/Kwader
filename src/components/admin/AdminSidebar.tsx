@@ -1,26 +1,19 @@
-import { LayoutDashboard, Briefcase, Building2, FolderTree, FileText, Settings, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Briefcase, Building2, FolderTree, Users, CreditCard, LogOut, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  SidebarHeader,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarHeader, useSidebar,
 } from "@/components/ui/sidebar";
 
 const mainItems = [
   { title: "نظرة عامة", url: "/admin", icon: LayoutDashboard },
   { title: "إدارة الوظائف", url: "/admin/jobs", icon: Briefcase },
   { title: "إدارة الجمعيات", url: "/admin/organizations", icon: Building2 },
+  { title: "المستخدمين", url: "/admin/users", icon: Users },
+  { title: "طلبات الاشتراك", url: "/admin/subscriptions", icon: CreditCard },
   { title: "التصنيفات", url: "/admin/categories", icon: FolderTree },
 ];
 
@@ -44,7 +37,6 @@ const AdminSidebar = () => {
           )}
         </div>
       </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>القائمة الرئيسية</SidebarGroupLabel>
@@ -53,12 +45,7 @@ const AdminSidebar = () => {
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/admin"}
-                      className="hover:bg-sidebar-accent/50 transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                    >
+                    <NavLink to={item.url} end={item.url === "/admin"} className="hover:bg-sidebar-accent/50 transition-colors" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
                       <item.icon className="ml-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -69,15 +56,9 @@ const AdminSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className="p-3">
         <Separator className="mb-2" />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={signOut}
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-        >
+        <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
           <LogOut className="h-4 w-4" />
           {!collapsed && "تسجيل الخروج"}
         </Button>

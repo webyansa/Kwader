@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getRedirectPath } from "@/lib/roles";
+import { isPlatformStaff, isOrganization, isJobSeeker } from "@/lib/roles";
 import type { Database } from "@/integrations/supabase/types";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -23,6 +23,7 @@ const Login = () => {
     e.preventDefault();
     if (!email.trim() || !password) return;
     setLoading(true);
+
     const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) {
       setLoading(false);
@@ -30,7 +31,7 @@ const Login = () => {
       return;
     }
 
-    // Check suspension status
+    // Check suspension
     const { data: profile } = await supabase
       .from("profiles")
       .select("status")
@@ -40,23 +41,53 @@ const Login = () => {
     if (profile?.status === "suspended") {
       await supabase.auth.signOut();
       setLoading(false);
-      toast({
-        title: "الحساب موقوف",
-        description: "تم تعليق حسابك. تواصل مع الإدارة لمزيد من المعلومات.",
-        variant: "destructive",
-      });
+      toast({ title: "الحساب موقوف", description: "تم تعليق حسابك. تواصل مع الإدارة.", variant: "destructive" });
       return;
     }
 
-    // Get roles for redirect
-    const { data: roles } = await supabase
+    // Get roles
+    const { data: rolesData } = await supabase
       .from("user_roles")
-      .select("role")
+      .select("role, org_id")
       .eq("user_id", data.user.id);
 
+    const userRoles = (rolesData?.map((r) => r.role) ?? []) as AppRole[];
+    const orgRole = rolesData?.find((r) => r.org_id);
+
     setLoading(false);
-    const userRoles = (roles?.map((r) => r.role) ?? []) as AppRole[];
-    navigate(getRedirectPath(userRoles));
+
+    // Platform staff
+    if (isPlatformStaff(userRoles)) {
+      navigate("/admin");
+      return;
+    }
+
+    // Organization - check subscription status
+    if (isOrganization(userRoles) && orgRole?.org_id) {
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("status")
+        .eq("org_id", orgRole.org_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (sub?.status === "active") {
+        navigate("/org/dashboard");
+      } else {
+        navigate("/org/pending");
+      }
+      return;
+    }
+
+    // Job seeker
+    if (isJobSeeker(userRoles)) {
+      navigate("/jobs");
+      return;
+    }
+
+    // Default
+    navigate("/");
   };
 
   return (

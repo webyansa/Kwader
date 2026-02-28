@@ -18,7 +18,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminJobs from "./pages/admin/AdminJobs";
 import AdminOrganizations from "./pages/admin/AdminOrganizations";
 import AdminCategories from "./pages/admin/AdminCategories";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import OrgDashboard from "./pages/org/OrgDashboard";
+import OrgPending from "./pages/org/OrgPending";
 import JobSeekerDashboard from "./pages/job-seeker/JobSeekerDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -50,6 +53,8 @@ const App = () => (
               <Route index element={<AdminDashboard />} />
               <Route path="jobs" element={<AdminJobs />} />
               <Route path="organizations" element={<AdminOrganizations />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="subscriptions" element={<AdminSubscriptions />} />
               <Route path="categories" element={<AdminCategories />} />
             </Route>
 
@@ -57,6 +62,11 @@ const App = () => (
             <Route path="/org/dashboard" element={
               <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
                 <OrgDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/org/pending" element={
+              <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
+                <OrgPending />
               </ProtectedRoute>
             } />
 
@@ -67,7 +77,6 @@ const App = () => (
               </ProtectedRoute>
             } />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
