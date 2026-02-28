@@ -56,9 +56,11 @@ import PortalProfileStatus from "./pages/portal/PortalProfileStatus";
 import TalentsLayout from "./components/talents/TalentsLayout";
 import TalentsDashboard from "./pages/talents/TalentsDashboard";
 import TalentsProfile from "./pages/talents/TalentsProfile";
+import TalentsCVStudio from "./pages/talents/TalentsCVStudio";
 import TalentsApplications from "./pages/talents/TalentsApplications";
 import TalentApplicationDetails from "./pages/talents/TalentApplicationDetails";
 import TalentsSettings from "./pages/talents/TalentsSettings";
+import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -161,6 +163,7 @@ const App = () => (
                 >
                   <Route path="dashboard" element={<TalentsDashboard />} />
                   <Route path="profile" element={<TalentsProfile />} />
+                  <Route path="cv" element={<TalentsCVStudio />} />
                   <Route path="applications" element={<TalentsApplications />} />
                   <Route path="applications/:id" element={<TalentApplicationDetails />} />
                   <Route path="settings" element={<TalentsSettings />} />
@@ -177,10 +180,14 @@ const App = () => (
                 >
                   <Route path="dashboard" element={<TalentsDashboard />} />
                   <Route path="profile" element={<TalentsProfile />} />
+                  <Route path="cv" element={<TalentsCVStudio />} />
                   <Route path="applications" element={<TalentsApplications />} />
                   <Route path="applications/:id" element={<TalentApplicationDetails />} />
                   <Route path="settings" element={<TalentsSettings />} />
                 </Route>
+
+                {/* Public profile */}
+                <Route path="/@:username" element={<PublicProfile />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

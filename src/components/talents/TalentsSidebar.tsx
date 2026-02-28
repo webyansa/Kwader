@@ -1,4 +1,4 @@
-import { LayoutDashboard, User, FileText, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, User, FileText, Settings, LogOut, Palette } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
 const mainItems = [
   { title: "لوحة التحكم", url: "/talents/dashboard", icon: LayoutDashboard },
   { title: "الملف المهني", url: "/talents/profile", icon: User },
+  { title: "استوديو CV", url: "/talents/cv", icon: Palette },
   { title: "طلباتي", url: "/talents/applications", icon: FileText },
   { title: "الإعدادات", url: "/talents/settings", icon: Settings },
 ];

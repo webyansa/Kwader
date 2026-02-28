@@ -88,6 +88,33 @@ export type Database = {
           },
         ]
       }
+      cv_exports: {
+        Row: {
+          created_at: string
+          file_type: string
+          file_url: string | null
+          id: string
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_type?: string
+          file_url?: string | null
+          id?: string
+          template_id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_type?: string
+          file_url?: string | null
+          id?: string
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_applications: {
         Row: {
           applicant_type: string
@@ -190,61 +217,85 @@ export type Database = {
       }
       job_seeker_profiles: {
         Row: {
+          avatar_url: string | null
           certifications: string | null
           city: string | null
           created_at: string
           cv_file_url: string | null
           education: string | null
           experience_level: string | null
+          experiences: Json | null
           full_name: string | null
+          headline: string | null
+          hide_contact: boolean
           id: string
           job_preferences: Json | null
           linkedin_url: string | null
           nationality: string | null
           portfolio_url: string | null
+          privacy: string
           profile_completion_percentage: number | null
+          projects: Json | null
           skills: string[] | null
           summary: string | null
           updated_at: string
           user_id: string
+          username: string | null
+          volunteering: Json | null
         }
         Insert: {
+          avatar_url?: string | null
           certifications?: string | null
           city?: string | null
           created_at?: string
           cv_file_url?: string | null
           education?: string | null
           experience_level?: string | null
+          experiences?: Json | null
           full_name?: string | null
+          headline?: string | null
+          hide_contact?: boolean
           id?: string
           job_preferences?: Json | null
           linkedin_url?: string | null
           nationality?: string | null
           portfolio_url?: string | null
+          privacy?: string
           profile_completion_percentage?: number | null
+          projects?: Json | null
           skills?: string[] | null
           summary?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
+          volunteering?: Json | null
         }
         Update: {
+          avatar_url?: string | null
           certifications?: string | null
           city?: string | null
           created_at?: string
           cv_file_url?: string | null
           education?: string | null
           experience_level?: string | null
+          experiences?: Json | null
           full_name?: string | null
+          headline?: string | null
+          hide_contact?: boolean
           id?: string
           job_preferences?: Json | null
           linkedin_url?: string | null
           nationality?: string | null
           portfolio_url?: string | null
+          privacy?: string
           profile_completion_percentage?: number | null
+          projects?: Json | null
           skills?: string[] | null
           summary?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
+          volunteering?: Json | null
         }
         Relationships: []
       }
@@ -830,6 +881,10 @@ export type Database = {
       approve_organization: { Args: { _org_id: string }; Returns: undefined }
       generate_arabic_slug: { Args: { _title: string }; Returns: string }
       generate_job_short_id: { Args: never; Returns: string }
+      generate_username: {
+        Args: { _full_name: string; _user_id: string }
+        Returns: string
+      }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
