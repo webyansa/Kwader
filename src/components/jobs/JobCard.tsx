@@ -7,6 +7,8 @@ const employmentTypeLabels: Record<string, string> = {
   part_time: "دوام جزئي",
   contract: "عقد",
   intern: "تدريب",
+  consultant: "استشاري",
+  volunteer: "تطوعي",
 };
 
 const remoteTypeLabels: Record<string, string> = {

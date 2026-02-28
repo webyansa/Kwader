@@ -1,9 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import ApplicationForm from "@/components/jobs/ApplicationForm";
 import ShareButtons from "@/components/jobs/ShareButtons";
 import ReportDialog from "@/components/jobs/ReportDialog";
 import SimilarJobs from "@/components/jobs/SimilarJobs";
@@ -221,7 +220,11 @@ const JobDetails = () => {
               {/* Application */}
               <div className="pt-4" id="apply">
                 {job.application_method === "internal_form" ? (
-                  <ApplicationForm jobId={job.id} />
+                  <Button asChild size="lg" className="w-full gap-2 rounded-[10px] h-12">
+                    <Link to={`/jobs/${job.slug_unique || job.id}/apply`}>
+                      قدّم الآن
+                    </Link>
+                  </Button>
                 ) : job.application_method === "external_url" && job.application_url ? (
                   <Button asChild size="lg" className="w-full gap-2 rounded-[10px] h-12">
                     <a href={job.application_url} target="_blank" rel="noopener noreferrer">
@@ -242,8 +245,10 @@ const JobDetails = () => {
             <aside className="space-y-5">
               {/* Sticky CTA */}
               <div className="sticky top-20">
-                <Button size="lg" className="w-full gap-2 rounded-[10px] h-12 mb-5" onClick={() => document.getElementById("apply")?.scrollIntoView({ behavior: "smooth" })}>
+                <Button size="lg" className="w-full gap-2 rounded-[10px] h-12 mb-5" asChild>
+                <Link to={`/jobs/${job.slug_unique || job.id}/apply`}>
                   قدّم الآن
+                </Link>
                 </Button>
 
                 {/* Org card */}

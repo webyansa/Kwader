@@ -8,6 +8,7 @@ import UserMenu from "./UserMenu";
 
 const publicLinks = [
   { label: "الرئيسية", href: "/" },
+  { label: "وظائف القطاع", href: "/sector-jobs" },
   { label: "عن المنصة", href: "/about" },
   { label: "دليل الجمعيات", href: "/ngos" },
   { label: "كوادر القطاع", href: "/talents-public" },

@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       applications: {
         Row: {
+          applicant_type: string
+          city: string | null
           cover_letter: string | null
           created_at: string
           cv_file_url: string | null
@@ -24,11 +26,16 @@ export type Database = {
           id: string
           job_id: string
           notes_internal: string | null
+          organization_id: string | null
           phone: string | null
           portfolio_url: string | null
+          screening_answers: Json | null
           status: Database["public"]["Enums"]["application_status"]
+          talent_user_id: string | null
         }
         Insert: {
+          applicant_type?: string
+          city?: string | null
           cover_letter?: string | null
           created_at?: string
           cv_file_url?: string | null
@@ -37,11 +44,16 @@ export type Database = {
           id?: string
           job_id: string
           notes_internal?: string | null
+          organization_id?: string | null
           phone?: string | null
           portfolio_url?: string | null
+          screening_answers?: Json | null
           status?: Database["public"]["Enums"]["application_status"]
+          talent_user_id?: string | null
         }
         Update: {
+          applicant_type?: string
+          city?: string | null
           cover_letter?: string | null
           created_at?: string
           cv_file_url?: string | null
@@ -50,9 +62,12 @@ export type Database = {
           id?: string
           job_id?: string
           notes_internal?: string | null
+          organization_id?: string | null
           phone?: string | null
           portfolio_url?: string | null
+          screening_answers?: Json | null
           status?: Database["public"]["Enums"]["application_status"]
+          talent_user_id?: string | null
         }
         Relationships: [
           {
