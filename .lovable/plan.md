@@ -1,63 +1,89 @@
 
 
-# خطة التنفيذ: المصادقة + صفحة الوظائف + تفاصيل الوظيفة
+## خطة تنفيذ نظام RBAC وتحسين تجربة ما بعد تسجيل الدخول
 
-## 1. نظام المصادقة
+### تحليل الوضع الحالي
 
-### صفحات جديدة:
-- **`/login`** — تسجيل دخول بالبريد وكلمة المرور (للجمعيات والإدارة)
-- **`/register`** — تسجيل جمعية جديدة (بيانات الجمعية + مسؤول الحساب)
-- **`/forgot-password`** — استعادة كلمة المرور
-- **`/reset-password`** — تعيين كلمة مرور جديدة
+الأدوار الموجودة في قاعدة البيانات: `super_admin`, `admin`, `moderator`, `finance`, `support`, `org_owner`, `org_hr_manager`, `org_viewer`
 
-### ملفات مساعدة:
-- **`src/hooks/useAuth.tsx`** — AuthContext مع `onAuthStateChange` + `getSession`، يوفر: user, session, role, orgId, signOut, loading
-- **`src/components/auth/ProtectedRoute.tsx`** — يحمي المسارات حسب الدور
+المطلوب إضافته: دور `job_seeker` (باحث عن وظيفة) غير موجود حالياً.
 
-### منطق التسجيل:
-1. `signUp` بالبريد + كلمة المرور + `full_name` في metadata
-2. trigger `handle_new_user` ينشئ profile تلقائيًا
-3. بعد التسجيل → صفحة "تحقق من بريدك"
-4. عند تسجيل جمعية: ينشئ سجل organization بحالة `pending` + يضيف دور `org_owner` في `user_roles`
+**خريطة الربط بين الأدوار المطلوبة والموجودة:**
 
-## 2. صفحة الوظائف `/jobs`
-
-### ملفات:
-- **`src/pages/Jobs.tsx`** — الصفحة الرئيسية
-- **`src/components/jobs/JobCard.tsx`** — بطاقة وظيفة (شعار، عنوان، مدينة، نوع عمل، badges Urgent/Featured، تاريخ إغلاق)
-- **`src/components/jobs/JobFilters.tsx`** — فلاتر جانبية (بحث نصي، مدينة، تصنيف، نوع عمل، عن بُعد، مستوى خبرة، عاجلة/مميزة)
-- **`src/hooks/useJobs.ts`** — React Query hook يجلب الوظائف المنشورة مع الفلاتر + join على organizations و categories
-
-### ترتيب النتائج:
-- Urgent أولاً → Featured → الأحدث (حسب `published_at`)
-
-## 3. صفحة تفاصيل الوظيفة `/jobs/:id`
-
-### ملفات:
-- **`src/pages/JobDetails.tsx`** — صفحة التفاصيل
-- **`src/components/jobs/ApplicationForm.tsx`** — نموذج التقديم الداخلي (اسم، بريد، هاتف، CV upload، رسالة تغطية)
-- **`src/components/jobs/ReportDialog.tsx`** — حوار الإبلاغ عن وظيفة
-- **`src/components/jobs/ShareButtons.tsx`** — أزرار المشاركة (نسخ رابط، واتساب، تويتر)
-- **`src/components/jobs/SimilarJobs.tsx`** — وظائف مشابهة (نفس التصنيف أو المدينة)
-
-### نموذج التقديم:
-- Zod validation للحقول
-- رفع CV إلى storage bucket `cvs` (حد 5MB، PDF/DOC/DOCX فقط)
-- Insert في جدول `applications` (RLS يسمح بـ INSERT للجميع)
-- رسالة نجاح بعد التقديم
-
-## 4. تحديث التوجيه (Router)
-
-إضافة المسارات في `App.tsx`:
-```
-/login, /register, /forgot-password, /reset-password
-/jobs, /jobs/:id
+```text
+المطلوب                → الموجود في قاعدة البيانات
+─────────────────────────────────────────────────
+PLATFORM_ADMIN         → super_admin, admin
+PLATFORM_EDITOR        → moderator
+JOB_SEEKER             → job_seeker (جديد)
+ORGANIZATION_OWNER     → org_owner
+ORGANIZATION_STAFF     → org_hr_manager, org_viewer
 ```
 
-لف التطبيق بـ `AuthProvider`.
+---
 
-## ملاحظات تقنية
-- لا تغيير على جداول قاعدة البيانات (البنية الحالية كافية)
-- RLS موجود: `applications` يسمح INSERT للجميع، `jobs` يسمح SELECT للمنشورة
-- التصميم RTL عربي متجاوب يتبع النمط الحالي (Teal palette + Tajawal font)
+### المهام التنفيذية
+
+#### 1. تحديث قاعدة البيانات
+- إضافة `job_seeker` إلى enum `app_role`
+- إضافة عمود `status` (active/suspended) إلى جدول `profiles` لإدارة حالة الحساب
+
+#### 2. إنشاء ملف أدوات الأدوار `src/lib/roles.ts`
+- دوال مركزية: `isAdmin()`, `isEditor()`, `isOrganization()`, `isJobSeeker()`, `hasRole()`, `isSuspended()`
+- تحديد مسار التوجيه حسب الدور: `getRedirectPath(roles)`
+
+#### 3. تحديث `useAuth` hook
+- إضافة `status` من جدول `profiles` إلى السياق
+- توفير `status` للمكونات لفحص حالة التعليق
+
+#### 4. تحديث صفحة تسجيل الدخول (`Login.tsx`)
+- فحص حالة الحساب (suspended) وعرض رسالة حظر
+- توجيه تلقائي حسب الدور باستخدام `getRedirectPath()`
+
+#### 5. تحديث شريط التنقل (`Navbar.tsx`)
+- **مستخدم غير مسجل:** أزرار تسجيل الدخول والتسجيل
+- **مدير المنصة/محرر:** زر "لوحة التحكم" + إخفاء "انشر وظيفة"
+- **حساب جمعية:** زر "لوحة الجمعية" + "انشر وظيفة"
+- **باحث عن وظيفة:** "طلباتي" + "الوظائف المحفوظة"
+- **الجميع بعد الدخول:** أفاتار + قائمة منسدلة (لوحتي، الملف الشخصي، تسجيل الخروج)
+
+#### 6. تحديث حماية المسارات (`ProtectedRoute.tsx`)
+- دعم فحص التعليق وعرض صفحة 403
+- تحديث `App.tsx` بالمسارات المحمية:
+  - `/admin/*` → super_admin, admin, moderator
+  - `/org/*` → org_owner, org_hr_manager, org_viewer
+  - `/job-seeker/*` → job_seeker
+
+#### 7. إنشاء صفحات جديدة
+- `/org/dashboard` — لوحة تحكم الجمعية (هيكل أساسي)
+- `/job-seeker/dashboard` — لوحة الباحث عن وظيفة (هيكل أساسي)
+- صفحة 403 (غير مصرح)
+
+#### 8. تحديث صفحة التسجيل
+- إضافة خيار التسجيل كباحث عن وظيفة (بدون بيانات جمعية) مع إسناد دور `job_seeker` تلقائياً
+
+---
+
+### التفاصيل التقنية
+
+**الملفات الجديدة:**
+- `src/lib/roles.ts`
+- `src/pages/org/OrgDashboard.tsx`
+- `src/pages/job-seeker/JobSeekerDashboard.tsx`
+- `src/pages/Forbidden.tsx`
+- `src/components/layout/UserMenu.tsx` (قائمة المستخدم المنسدلة)
+
+**الملفات المعدّلة:**
+- `src/hooks/useAuth.tsx` — إضافة status
+- `src/pages/Login.tsx` — توجيه ذكي + فحص التعليق
+- `src/components/layout/Navbar.tsx` — عرض عناصر حسب الدور
+- `src/components/auth/ProtectedRoute.tsx` — فحص التعليق
+- `src/App.tsx` — إضافة المسارات الجديدة
+- `src/pages/Register.tsx` — خيار تسجيل باحث عن وظيفة
+
+**Migration SQL:**
+```sql
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'job_seeker';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active';
+```
 
