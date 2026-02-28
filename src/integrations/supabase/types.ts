@@ -203,6 +203,7 @@ export type Database = {
           application_email: string | null
           application_method: Database["public"]["Enums"]["application_method"]
           application_url: string | null
+          benefits: string[] | null
           boost_until: string | null
           category_id: string | null
           city: string | null
@@ -210,31 +211,42 @@ export type Database = {
           closing_date: string | null
           created_at: string
           created_by: string | null
+          department: string | null
           description: string | null
+          education: string | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           experience_level: Database["public"]["Enums"]["experience_level"]
+          experience_years_max: number | null
+          experience_years_min: number | null
           id: string
           is_featured: boolean
           is_urgent: boolean
+          languages: Json | null
           moderation_notes: string | null
           org_id: string
           published_at: string | null
           remote_type: Database["public"]["Enums"]["remote_type"]
           requirements: string | null
           responsibilities: string | null
+          salary_display: string | null
           salary_max: number | null
           salary_min: number | null
           salary_visible: boolean
+          screening_questions: Json | null
+          skills: string[] | null
           status: Database["public"]["Enums"]["job_status"]
           subcategory_id: string | null
+          summary: string | null
           title: string
           updated_at: string
+          vacancies: number | null
           views_count: number
         }
         Insert: {
           application_email?: string | null
           application_method?: Database["public"]["Enums"]["application_method"]
           application_url?: string | null
+          benefits?: string[] | null
           boost_until?: string | null
           category_id?: string | null
           city?: string | null
@@ -242,31 +254,42 @@ export type Database = {
           closing_date?: string | null
           created_at?: string
           created_by?: string | null
+          department?: string | null
           description?: string | null
+          education?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           experience_level?: Database["public"]["Enums"]["experience_level"]
+          experience_years_max?: number | null
+          experience_years_min?: number | null
           id?: string
           is_featured?: boolean
           is_urgent?: boolean
+          languages?: Json | null
           moderation_notes?: string | null
           org_id: string
           published_at?: string | null
           remote_type?: Database["public"]["Enums"]["remote_type"]
           requirements?: string | null
           responsibilities?: string | null
+          salary_display?: string | null
           salary_max?: number | null
           salary_min?: number | null
           salary_visible?: boolean
+          screening_questions?: Json | null
+          skills?: string[] | null
           status?: Database["public"]["Enums"]["job_status"]
           subcategory_id?: string | null
+          summary?: string | null
           title: string
           updated_at?: string
+          vacancies?: number | null
           views_count?: number
         }
         Update: {
           application_email?: string | null
           application_method?: Database["public"]["Enums"]["application_method"]
           application_url?: string | null
+          benefits?: string[] | null
           boost_until?: string | null
           category_id?: string | null
           city?: string | null
@@ -274,25 +297,35 @@ export type Database = {
           closing_date?: string | null
           created_at?: string
           created_by?: string | null
+          department?: string | null
           description?: string | null
+          education?: string | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           experience_level?: Database["public"]["Enums"]["experience_level"]
+          experience_years_max?: number | null
+          experience_years_min?: number | null
           id?: string
           is_featured?: boolean
           is_urgent?: boolean
+          languages?: Json | null
           moderation_notes?: string | null
           org_id?: string
           published_at?: string | null
           remote_type?: Database["public"]["Enums"]["remote_type"]
           requirements?: string | null
           responsibilities?: string | null
+          salary_display?: string | null
           salary_max?: number | null
           salary_min?: number | null
           salary_visible?: boolean
+          screening_questions?: Json | null
+          skills?: string[] | null
           status?: Database["public"]["Enums"]["job_status"]
           subcategory_id?: string | null
+          summary?: string | null
           title?: string
           updated_at?: string
+          vacancies?: number | null
           views_count?: number
         }
         Relationships: [
@@ -784,8 +817,14 @@ export type Database = {
         | "shortlisted"
         | "rejected"
         | "hired"
-      employment_type: "full_time" | "part_time" | "contract" | "intern"
-      experience_level: "junior" | "mid" | "senior" | "any"
+      employment_type:
+        | "full_time"
+        | "part_time"
+        | "contract"
+        | "intern"
+        | "consultant"
+        | "volunteer"
+      experience_level: "junior" | "mid" | "senior" | "any" | "leadership"
       job_status:
         | "draft"
         | "submitted"
@@ -950,8 +989,15 @@ export const Constants = {
         "rejected",
         "hired",
       ],
-      employment_type: ["full_time", "part_time", "contract", "intern"],
-      experience_level: ["junior", "mid", "senior", "any"],
+      employment_type: [
+        "full_time",
+        "part_time",
+        "contract",
+        "intern",
+        "consultant",
+        "volunteer",
+      ],
+      experience_level: ["junior", "mid", "senior", "any", "leadership"],
       job_status: [
         "draft",
         "submitted",
