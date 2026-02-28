@@ -17,7 +17,7 @@ const AdminDashboard = () => {
         supabase.from("jobs").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]),
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("organizations").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("applications").select("id", { count: "exact", head: true }),
+        supabase.from("job_applications").select("id", { count: "exact", head: true }),
       ]);
       return {
         totalJobs: jobs.count ?? 0,

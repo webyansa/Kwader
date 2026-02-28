@@ -120,7 +120,10 @@ const ApplyJob = () => {
   };
 
   const handleTalentSubmit = async () => {
-    if (!job || !user) return;
+    if (!job || !user || !job.org_id) {
+      toast({ title: "تعذر التقديم", description: "بيانات الوظيفة غير مكتملة", variant: "destructive" });
+      return;
+    }
     setLoading(true);
 
     let cvUrl: string | null = null;
@@ -146,30 +149,38 @@ const ApplyJob = () => {
       answer: screeningAnswers[i] || "",
     }));
 
-    const { error } = await supabase.from("applications").insert({
+    const payload = {
       job_id: job.id,
       organization_id: job.org_id,
       applicant_type: "talent",
       talent_user_id: user.id,
-      full_name: talentProfile?.full_name || user.email?.split("@")[0] || "",
+      created_by_user_id: user.id,
+      full_name: talentProfile?.full_name || user.email?.split("@")[0] || "متقدم",
       email: user.email || "",
-      phone: talentProfile?.city || null,
+      phone: null,
       cv_file_url: cvUrl,
       cover_letter: talentCoverLetter || null,
+      cover_message: talentCoverLetter || null,
       city: talentProfile?.city || null,
       screening_answers: answersJson.length > 0 ? answersJson : null,
-    });
+      source: "web",
+      status: "new" as any,
+    };
+
+    const { data: inserted, error } = await supabase.from("job_applications").insert([payload]).select("id, job_id, organization_id, talent_user_id").single();
 
     setLoading(false);
     if (error) {
       toast({ title: "خطأ في التقديم", description: error.message, variant: "destructive" });
     } else {
-      setSuccess(true);
+      console.info("application_created", inserted);
+      toast({ title: "تم إرسال طلبك بنجاح ✅" });
+      navigate("/talent/applications");
     }
   };
 
   const handleGuestSubmit = async () => {
-    if (!job) return;
+    if (!job || !job.org_id) return;
     setErrors({});
 
     const result = guestSchema.safeParse({ full_name: fullName, email, phone, city, cover_letter: coverLetter, terms });
@@ -202,23 +213,33 @@ const ApplyJob = () => {
       answer: screeningAnswers[i] || "",
     }));
 
-    const { error } = await supabase.from("applications").insert({
+    const payload = {
       job_id: job.id,
       organization_id: job.org_id,
       applicant_type: "guest",
-      full_name: result.data.full_name,
+      created_by_user_id: crypto.randomUUID(),
       email: result.data.email,
       phone: result.data.phone || null,
       city: result.data.city || null,
+      guest_full_name: result.data.full_name,
+      guest_email: result.data.email,
+      guest_mobile: result.data.phone || null,
       cv_file_url: cvUrl,
       cover_letter: result.data.cover_letter || null,
+      cover_message: result.data.cover_letter || null,
       screening_answers: answersJson.length > 0 ? answersJson : null,
-    });
+      source: "web",
+      status: "new" as any,
+    };
+
+    const { data: inserted, error } = await supabase.from("job_applications").insert([payload]).select("id, job_id, organization_id, talent_user_id").single();
 
     setLoading(false);
     if (error) {
       toast({ title: "خطأ في التقديم", description: error.message, variant: "destructive" });
     } else {
+      console.info("application_created", inserted);
+      toast({ title: "تم إرسال طلبك بنجاح ✅" });
       setSuccess(true);
     }
   };
@@ -289,7 +310,7 @@ const ApplyJob = () => {
             {mode === "talent" && (
               <div className="flex gap-3 justify-center">
                 <Button asChild className="rounded-xl">
-                  <Link to="/talents/applications">متابعة طلباتي</Link>
+                  <Link to="/talent/applications">متابعة طلباتي</Link>
                 </Button>
                 <Button variant="outline" asChild className="rounded-xl">
                   <Link to="/sector-jobs">تصفح وظائف أخرى</Link>

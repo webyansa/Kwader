@@ -14,71 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      applications: {
-        Row: {
-          applicant_type: string
-          city: string | null
-          cover_letter: string | null
-          created_at: string
-          cv_file_url: string | null
-          email: string
-          full_name: string
-          id: string
-          job_id: string
-          notes_internal: string | null
-          organization_id: string | null
-          phone: string | null
-          portfolio_url: string | null
-          screening_answers: Json | null
-          status: Database["public"]["Enums"]["application_status"]
-          talent_user_id: string | null
-        }
-        Insert: {
-          applicant_type?: string
-          city?: string | null
-          cover_letter?: string | null
-          created_at?: string
-          cv_file_url?: string | null
-          email: string
-          full_name: string
-          id?: string
-          job_id: string
-          notes_internal?: string | null
-          organization_id?: string | null
-          phone?: string | null
-          portfolio_url?: string | null
-          screening_answers?: Json | null
-          status?: Database["public"]["Enums"]["application_status"]
-          talent_user_id?: string | null
-        }
-        Update: {
-          applicant_type?: string
-          city?: string | null
-          cover_letter?: string | null
-          created_at?: string
-          cv_file_url?: string | null
-          email?: string
-          full_name?: string
-          id?: string
-          job_id?: string
-          notes_internal?: string | null
-          organization_id?: string | null
-          phone?: string | null
-          portfolio_url?: string | null
-          screening_answers?: Json | null
-          status?: Database["public"]["Enums"]["application_status"]
-          talent_user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "applications_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       audit_logs: {
         Row: {
           action: string
@@ -149,6 +84,106 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_applications: {
+        Row: {
+          applicant_type: string
+          city: string | null
+          cover_letter: string | null
+          cover_message: string | null
+          created_at: string
+          created_by_user_id: string
+          cv_file_url: string
+          email: string
+          full_name: string
+          guest_email: string | null
+          guest_full_name: string | null
+          guest_mobile: string | null
+          id: string
+          job_id: string
+          notes_internal: string | null
+          organization_id: string
+          phone: string | null
+          portfolio_url: string | null
+          screening_answers: Json | null
+          source: string
+          status: Database["public"]["Enums"]["application_status"]
+          talent_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          applicant_type?: string
+          city?: string | null
+          cover_letter?: string | null
+          cover_message?: string | null
+          created_at?: string
+          created_by_user_id: string
+          cv_file_url: string
+          email: string
+          full_name: string
+          guest_email?: string | null
+          guest_full_name?: string | null
+          guest_mobile?: string | null
+          id?: string
+          job_id: string
+          notes_internal?: string | null
+          organization_id: string
+          phone?: string | null
+          portfolio_url?: string | null
+          screening_answers?: Json | null
+          source?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          talent_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applicant_type?: string
+          city?: string | null
+          cover_letter?: string | null
+          cover_message?: string | null
+          created_at?: string
+          created_by_user_id?: string
+          cv_file_url?: string
+          email?: string
+          full_name?: string
+          guest_email?: string | null
+          guest_full_name?: string | null
+          guest_mobile?: string | null
+          id?: string
+          job_id?: string
+          notes_internal?: string | null
+          organization_id?: string
+          phone?: string | null
+          portfolio_url?: string | null
+          screening_answers?: Json | null
+          source?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          talent_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -843,6 +878,9 @@ export type Database = {
         | "shortlisted"
         | "rejected"
         | "hired"
+        | "in_review"
+        | "interview"
+        | "offer"
       employment_type:
         | "full_time"
         | "part_time"
@@ -1014,6 +1052,9 @@ export const Constants = {
         "shortlisted",
         "rejected",
         "hired",
+        "in_review",
+        "interview",
+        "offer",
       ],
       employment_type: [
         "full_time",
