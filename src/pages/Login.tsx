@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { getRedirectPath } from "@/lib/roles";
+import type { Database } from "@/integrations/supabase/types";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+
+type AppRole = Database["public"]["Enums"]["app_role"];
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -26,15 +30,33 @@ const Login = () => {
       return;
     }
 
-    // Check if user has admin role to redirect appropriately
+    // Check suspension status
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("status")
+      .eq("user_id", data.user.id)
+      .single();
+
+    if (profile?.status === "suspended") {
+      await supabase.auth.signOut();
+      setLoading(false);
+      toast({
+        title: "الحساب موقوف",
+        description: "تم تعليق حسابك. تواصل مع الإدارة لمزيد من المعلومات.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Get roles for redirect
     const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", data.user.id);
 
     setLoading(false);
-    const isAdmin = roles?.some((r) => ["super_admin", "admin", "moderator"].includes(r.role));
-    navigate(isAdmin ? "/admin" : "/");
+    const userRoles = (roles?.map((r) => r.role) ?? []) as AppRole[];
+    navigate(getRedirectPath(userRoles));
   };
 
   return (
@@ -61,7 +83,7 @@ const Login = () => {
           </form>
           <div className="flex items-center justify-between text-sm">
             <Link to="/forgot-password" className="text-primary hover:underline">نسيت كلمة المرور؟</Link>
-            <Link to="/register" className="text-primary hover:underline">تسجيل جمعية جديدة</Link>
+            <Link to="/register" className="text-primary hover:underline">تسجيل حساب جديد</Link>
           </div>
         </div>
       </main>

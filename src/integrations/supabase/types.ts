@@ -436,6 +436,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          status: string
           updated_at: string
           user_id: string
         }
@@ -445,6 +446,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          status?: string
           updated_at?: string
           user_id: string
         }
@@ -454,6 +456,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -563,6 +566,7 @@ export type Database = {
         | "org_owner"
         | "org_hr_manager"
         | "org_viewer"
+        | "job_seeker"
       application_method: "internal_form" | "external_url" | "email"
       application_status:
         | "new"
@@ -720,6 +724,7 @@ export const Constants = {
         "org_owner",
         "org_hr_manager",
         "org_viewer",
+        "job_seeker",
       ],
       application_method: ["internal_form", "external_url", "email"],
       application_status: [
