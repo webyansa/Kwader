@@ -1,66 +1,75 @@
 
 
-## خطة تطوير الموقع العام لمنصة كوادر
+# خطة تنفيذ نموذج نشر الوظائف الاحترافي مع الذكاء الاصطناعي
 
-### المشكلة الرئيسية
-المسار `/talents` محجوز حالياً كـ protected layout للكوادر. يجب نقل الـ protected layout إلى `/talents/app/*` أو إعادة هيكلة بحيث `/talents` العام يكون صفحة مستقلة والمسارات المحمية تبقى كـ nested routes.
-
-### الحل
-- `/talents` = صفحة عامة (كوادر القطاع)
-- `/talents/dashboard`, `/talents/profile`, etc. = مسارات محمية داخل TalentsLayout
-- يتم التفريق في `App.tsx` بوضع الصفحة العامة كـ route مستقل قبل الـ protected layout
+## ملخص
+إعادة بناء نموذج إنشاء الوظيفة كمعالج من 5 أقسام مع حقول احترافية جديدة، ودعم توليد المحتوى بالذكاء الاصطناعي (Lovable AI / Gemini)، وحفظ تلقائي، ومعاينة حية، وربط بسير الموافقات.
 
 ---
 
-### التغييرات
+## التفاصيل التقنية
 
-#### 1. إنشاء 8 صفحات عامة جديدة
+### 1. تحديث قاعدة البيانات (Migration)
 
-| الصفحة | المسار | المحتوى |
-|--------|--------|---------|
-| عن المنصة | `/about` | تعريف، رؤية، أرقام |
-| دليل الجمعيات | `/ngos` | قائمة من `organizations` (active) + فلاتر مدينة |
-| تفاصيل جمعية | `/ngos/:slug` | بيانات + وظائف مفتوحة |
-| كوادر القطاع | `/talents-public` | بطاقات عامة من `job_seeker_profiles` + CTAs |
-| بوابة الكيانات | `/portal-landing` | صفحة هبوط + CTAs |
-| بوابة الكوادر | `/talents-portal` | صفحة هبوط + CTAs |
-| باقات الأسعار | `/pricing` | الباقات من `plans` |
-| اتصل بنا | `/contact` | نموذج تواصل |
+إضافة أعمدة جديدة لجدول `jobs`:
+- `department` (text, nullable) — القسم/الإدارة
+- `summary` (text, nullable) — ملخص سريع
+- `skills` (text[], default '{}') — مهارات
+- `vacancies` (integer, default 1) — عدد الشواغر
+- `experience_years_min` (integer, nullable)
+- `experience_years_max` (integer, nullable)
+- `education` (text, nullable) — المؤهل العلمي
+- `languages` (jsonb, default '[]') — اللغات
+- `salary_display` (text, default 'hidden') — عرض الراتب (hidden/range/visible)
+- `benefits` (text[], default '{}') — المزايا
+- `screening_questions` (jsonb, default '[]') — أسئلة الفرز
 
-ملاحظة: `/talents` محجوز للـ protected layout، لذا الصفحة العامة ستكون `/talents-public`.
+تحديث enum `employment_type` بإضافة: `consultant`, `volunteer`
+تحديث enum `experience_level` بإضافة: `leadership`
 
-#### 2. تحديث `Navbar.tsx`
-- روابط عامة: الرئيسية `/`، عن المنصة `/about`، دليل الجمعيات `/ngos`، كوادر القطاع `/talents-public`، الأسعار `/pricing`، اتصل بنا `/contact`
-- أزرار: بوابة الكيانات `/portal-landing`، بوابة الكوادر `/talents-portal`، تسجيل دخول
-- مسجل: أزرار حسب الدور
+### 2. Edge Function للذكاء الاصطناعي
 
-#### 3. تحديث `Footer.tsx`
-- تحديث البراند من "وظائف" إلى "كوادر"
-- تحديث الروابط
+إنشاء `supabase/functions/generate-job-content/index.ts`:
+- يستقبل: title, department, city, remote_type, employment_type, experience_level, skills, org_short_description
+- يرسل إلى Lovable AI Gateway (gemini-3-flash-preview)
+- System prompt مخصص للقطاع غير الربحي السعودي
+- يُرجع: summary, description, responsibilities, requirements, suggested_skills
+- دعم أنماط (مختصر / تفصيلي / مهني راقٍ / رسمي)
+- دعم إعادة صياغة قسم محدد (rewrite)
+- Non-streaming response عبر `supabase.functions.invoke()`
 
-#### 4. تحديث `App.tsx`
-- إضافة 8 مسارات عامة جديدة
+تحديث `supabase/config.toml` بإضافة الدالة مع `verify_jwt = false`
 
-#### 5. تحديث محتوى موجود
-- `OrgsSection.tsx`: تحديث الروابط إلى `/ngos/`
-- `CTASection.tsx`: تحديث النصوص
-- `HeroSection.tsx`: تحديث لهوية "كوادر"
+### 3. إعادة بناء `PortalNewJob.tsx` بالكامل
 
-#### 6. إضافة RLS policy
-- إضافة policy عامة للقراءة على `job_seeker_profiles` (بيانات عامة فقط عبر view أو select محدود)
-- إضافة policy عامة لقراءة `organizations` النشطة (موجودة بالفعل)
+**5 أقسام Stepper:**
+1. **البيانات الأساسية** — المسمى، القسم، المنطقة+المدينة، نمط العمل، نوع الدوام، المستوى، عدد الشواغر، تاريخ الإغلاق
+2. **تفاصيل الوظيفة (AI)** — ملخص، وصف (Rich Text area)، مسؤوليات، متطلبات، مهارات (tags)، سنوات الخبرة، مؤهل، لغات. زر AI لتوليد المحتوى + إعادة توليد بأنماط + تحسين صياغة
+3. **الراتب والمزايا** — عرض الراتب (select)، نطاق، مزايا (tags)
+4. **أسئلة الفرز** — أسئلة نعم/لا، سؤال نصي، خيار رفع ملف
+5. **المراجعة والمعاينة** — Preview كامل + تحذير + أزرار حفظ/إرسال
 
-#### 7. Migration
-- إضافة عمود `slug` لجدول `organizations` إذا لم يكن مفعّلاً
-- إضافة RLS policy لعرض الملفات العامة للكوادر
+**وظائف إضافية:**
+- Auto-save إلى localStorage عند كل تغيير
+- حفظ كمسودة (INSERT/UPDATE في jobs مع status=draft)
+- إرسال للاعتماد (status=submitted) مع validation
+- Live Preview sidebar (lg screens)
+- جلب بيانات الجمعية (org_id, short_description) لتغذية AI
 
----
+### 4. تكامل الذكاء الاصطناعي في الواجهة
 
-### الملفات
+- زر "✨ توليد بالذكاء الاصطناعي" في القسم 2
+- Modal يعرض حالة التوليد (loading)
+- ملء الحقول تلقائياً بالنتائج
+- زر "إعادة توليد" مع dropdown لاختيار الأسلوب
+- زر "تحسين الصياغة" لكل حقل نصي منفرد
 
-**جديدة (8):**
-`src/pages/About.tsx`, `src/pages/NGOsDirectory.tsx`, `src/pages/NGOProfile.tsx`, `src/pages/TalentsPublic.tsx`, `src/pages/PortalLanding.tsx`, `src/pages/TalentsPortalLanding.tsx`, `src/pages/Pricing.tsx`, `src/pages/Contact.tsx`
+### 5. الملفات المتأثرة
 
-**معدّلة (6):**
-`src/App.tsx`, `src/components/layout/Navbar.tsx`, `src/components/layout/Footer.tsx`, `src/components/home/OrgsSection.tsx`, `src/components/home/CTASection.tsx`, `src/components/home/HeroSection.tsx`
+| ملف | عملية |
+|---|---|
+| Migration SQL | إنشاء |
+| `supabase/functions/generate-job-content/index.ts` | إنشاء |
+| `supabase/config.toml` | تحديث |
+| `src/pages/portal/PortalNewJob.tsx` | إعادة بناء كامل |
 
