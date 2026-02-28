@@ -10,6 +10,7 @@ import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import TalentRegister from "./pages/TalentRegister";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Forbidden from "./pages/Forbidden";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/jobs/:id" element={<JobDetails />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/register/talent" element={<TalentRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/forbidden" element={<Forbidden />} />

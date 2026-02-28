@@ -290,7 +290,7 @@ const Register = () => {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <button
-                onClick={() => { setAccountType("seeker"); setPhase("form"); }}
+                onClick={() => navigate("/register/talent")}
                 className="group flex flex-col items-center gap-3 rounded-xl border-2 border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-md"
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
