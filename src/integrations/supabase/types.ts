@@ -138,6 +138,51 @@ export type Database = {
           },
         ]
       }
+      job_seeker_profiles: {
+        Row: {
+          city: string | null
+          created_at: string
+          cv_file_url: string | null
+          experience_level: string | null
+          full_name: string | null
+          id: string
+          linkedin_url: string | null
+          nationality: string | null
+          portfolio_url: string | null
+          skills: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          cv_file_url?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string
+          linkedin_url?: string | null
+          nationality?: string | null
+          portfolio_url?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          cv_file_url?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string
+          linkedin_url?: string | null
+          nationality?: string | null
+          portfolio_url?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           application_email: string | null
@@ -498,6 +543,54 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          org_id: string
+          plan_id: string
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          org_id: string
+          plan_id: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          org_id?: string
+          plan_id?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -535,6 +628,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_organization: { Args: { _org_id: string }; Returns: undefined }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
@@ -544,6 +638,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      register_job_seeker: {
+        Args: { _city?: string; _full_name?: string }
+        Returns: undefined
+      }
       register_organization: {
         Args: {
           _city?: string
@@ -551,9 +649,14 @@ export type Database = {
           _license_number?: string
           _name_ar: string
           _phone?: string
+          _plan_id: string
           _website?: string
         }
         Returns: string
+      }
+      reject_organization: {
+        Args: { _org_id: string; _reason?: string }
+        Returns: undefined
       }
     }
     Enums: {
