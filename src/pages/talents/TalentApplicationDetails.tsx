@@ -68,7 +68,7 @@ const TalentApplicationDetails = () => {
     <div className="space-y-5" dir="rtl">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" asChild>
-          <Link to="/talent/applications"><ArrowRight className="h-4 w-4" /></Link>
+          <Link to="/talents/applications"><ArrowRight className="h-4 w-4" /></Link>
         </Button>
         <h1 className="font-display text-2xl font-bold text-foreground">تفاصيل الطلب</h1>
       </div>

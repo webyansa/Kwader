@@ -175,7 +175,7 @@ const ApplyJob = () => {
     } else {
       console.info("application_created", inserted);
       toast({ title: "تم إرسال طلبك بنجاح ✅" });
-      navigate("/talent/applications");
+      navigate("/talents/applications");
     }
   };
 
@@ -218,6 +218,7 @@ const ApplyJob = () => {
       organization_id: job.org_id,
       applicant_type: "guest",
       created_by_user_id: crypto.randomUUID(),
+      full_name: result.data.full_name,
       email: result.data.email,
       phone: result.data.phone || null,
       city: result.data.city || null,
@@ -310,7 +311,7 @@ const ApplyJob = () => {
             {mode === "talent" && (
               <div className="flex gap-3 justify-center">
                 <Button asChild className="rounded-xl">
-                  <Link to="/talent/applications">متابعة طلباتي</Link>
+                  <Link to="/talents/applications">متابعة طلباتي</Link>
                 </Button>
                 <Button variant="outline" asChild className="rounded-xl">
                   <Link to="/sector-jobs">تصفح وظائف أخرى</Link>

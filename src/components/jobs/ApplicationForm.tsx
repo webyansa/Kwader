@@ -56,6 +56,11 @@ const ApplicationForm = ({ jobId }: ApplicationFormProps) => {
       }
     }
 
+    if (!cvFile) {
+      setErrors({ cv: "السيرة الذاتية مطلوبة" });
+      return;
+    }
+
     setLoading(true);
     let cvUrl: string | null = null;
 
@@ -71,8 +76,18 @@ const ApplicationForm = ({ jobId }: ApplicationFormProps) => {
       cvUrl = path;
     }
 
+    // Fetch job to get organization_id
+    const { data: jobData } = await supabase.from("jobs").select("org_id").eq("id", jobId).single();
+    const orgId = jobData?.org_id;
+    if (!orgId) {
+      toast({ title: "خطأ", description: "تعذر جلب بيانات الوظيفة", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     const { error } = await supabase.from("job_applications").insert([{
       job_id: jobId,
+      organization_id: orgId,
       applicant_type: "guest",
       created_by_user_id: crypto.randomUUID(),
       full_name: result.data.full_name,
