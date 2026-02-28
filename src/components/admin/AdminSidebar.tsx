@@ -12,6 +12,7 @@ const mainItems = [
   { title: "نظرة عامة", url: "/admin", icon: LayoutDashboard },
   { title: "إدارة الوظائف", url: "/admin/jobs", icon: Briefcase },
   { title: "إدارة الكيانات", url: "/admin/organizations", icon: Building2 },
+  { title: "مراجعة ملفات الجمعيات", url: "/admin/ngos/reviews", icon: Shield },
   { title: "المستخدمين", url: "/admin/users", icon: Users },
   { title: "طلبات الاشتراك", url: "/admin/subscriptions", icon: CreditCard },
   { title: "التصنيفات", url: "/admin/categories", icon: FolderTree },
