@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -193,10 +194,10 @@ const AdminJobs = () => {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => { setSelectedJob(job); setModerationNotes(job.moderation_notes || ""); }}
+                        asChild
                         title="مراجعة"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Link to={`/admin/jobs/reviews/${job.id}`}><Eye className="h-4 w-4" /></Link>
                       </Button>
                       {(job.status === "submitted" || job.status === "under_review") && (
                         <>

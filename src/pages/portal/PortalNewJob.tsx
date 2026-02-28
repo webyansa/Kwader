@@ -282,7 +282,7 @@ const PortalNewJob = () => {
       });
       localStorage.removeItem(AUTOSAVE_KEY);
       toast({ title: "تم إرسال الوظيفة للاعتماد ✓" });
-      navigate("/portal/jobs");
+      navigate(`/portal/jobs/${jobId}`);
     } catch (e: any) {
       toast({ title: "خطأ في الإرسال", description: e.message, variant: "destructive" });
     } finally {

@@ -25,7 +25,7 @@ const JobCard = ({ job }: JobCardProps) => {
 
   return (
     <Link
-      to={`/jobs/${job.id}`}
+      to={`/jobs/${job.slug_unique || job.id}`}
       className="group block rounded-xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-md"
     >
       <div className="flex items-start gap-4">
