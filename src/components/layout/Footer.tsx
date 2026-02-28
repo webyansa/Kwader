@@ -3,15 +3,15 @@ import { Link } from "react-router-dom";
 const footerLinks = {
   platform: [
     { label: "الرئيسية", href: "/" },
+    { label: "عن المنصة", href: "/about" },
     { label: "الوظائف", href: "/jobs" },
-    { label: "دليل الجمعيات", href: "/organizations" },
-    { label: "الأسعار", href: "/pricing" },
+    { label: "دليل الجمعيات", href: "/ngos" },
+    { label: "باقات الأسعار", href: "/pricing" },
   ],
-  services: [
-    { label: "نشر الوظائف", href: "/services" },
-    { label: "الوظائف المميزة", href: "/services" },
-    { label: "الوظائف العاجلة", href: "/services" },
-    { label: "إدارة الطلبات", href: "/services" },
+  portals: [
+    { label: "بوابة الكيانات", href: "/portal-landing" },
+    { label: "بوابة الكوادر", href: "/talents-portal" },
+    { label: "كوادر القطاع", href: "/talents-public" },
   ],
   legal: [
     { label: "الشروط والأحكام", href: "/terms" },
@@ -29,9 +29,9 @@ const Footer = () => {
           <div>
             <div className="mb-4 flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="font-display text-lg font-bold text-primary-foreground">و</span>
+                <span className="font-display text-lg font-bold text-primary-foreground">ك</span>
               </div>
-              <span className="font-display text-xl font-bold">وظائف</span>
+              <span className="font-display text-xl font-bold">كوادر</span>
             </div>
             <p className="text-sm leading-relaxed text-muted-foreground">
               منصة التوظيف المتخصصة للقطاع غير الربحي في السعودية والعالم العربي.
@@ -53,12 +53,12 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services Links */}
+          {/* Portals */}
           <div>
-            <h4 className="mb-4 font-display text-sm font-bold">الخدمات</h4>
+            <h4 className="mb-4 font-display text-sm font-bold">البوابات</h4>
             <ul className="space-y-2">
-              {footerLinks.services.map((link, i) => (
-                <li key={i}>
+              {footerLinks.portals.map((link) => (
+                <li key={link.href + link.label}>
                   <Link to={link.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                     {link.label}
                   </Link>
@@ -84,7 +84,7 @@ const Footer = () => {
 
         <div className="mt-10 border-t pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} منصة وظائف القطاع غير الربحي. جميع الحقوق محفوظة.
+            © {new Date().getFullYear()} منصة كوادر — توظيف القطاع غير الربحي. جميع الحقوق محفوظة.
           </p>
         </div>
       </div>

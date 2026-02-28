@@ -8,7 +8,11 @@ import UserMenu from "./UserMenu";
 
 const publicLinks = [
   { label: "الرئيسية", href: "/" },
-  { label: "الوظائف", href: "/jobs" },
+  { label: "عن المنصة", href: "/about" },
+  { label: "دليل الجمعيات", href: "/ngos" },
+  { label: "كوادر القطاع", href: "/talents-public" },
+  { label: "باقات الأسعار", href: "/pricing" },
+  { label: "اتصل بنا", href: "/contact" },
 ];
 
 const Navbar = () => {
@@ -31,7 +35,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-5 lg:flex">
           {publicLinks.map((link) => (
             <Link
               key={link.href}
@@ -43,7 +47,7 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           {!loading && isLoggedIn ? (
             <>
               {staff && (
@@ -71,10 +75,10 @@ const Navbar = () => {
           ) : !loading ? (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/register?type=org">بوابة الكيانات</Link>
+                <Link to="/portal-landing">بوابة الكيانات</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/register?type=seeker">بوابة الكوادر</Link>
+                <Link to="/talents-portal">بوابة الكوادر</Link>
               </Button>
               <Button size="sm" asChild>
                 <Link to="/login">تسجيل دخول</Link>
@@ -84,14 +88,14 @@ const Navbar = () => {
         </div>
 
         {/* Mobile toggle */}
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+        <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="border-t bg-card p-4 md:hidden">
+        <div className="border-t bg-card p-4 lg:hidden">
           <div className="flex flex-col gap-3">
             {publicLinks.map((link) => (
               <Link
@@ -131,10 +135,10 @@ const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/register?type=org" onClick={() => setMobileOpen(false)}>بوابة الكيانات</Link>
+                  <Link to="/portal-landing" onClick={() => setMobileOpen(false)}>بوابة الكيانات</Link>
                 </Button>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/register?type=seeker" onClick={() => setMobileOpen(false)}>بوابة الكوادر</Link>
+                  <Link to="/talents-portal" onClick={() => setMobileOpen(false)}>بوابة الكوادر</Link>
                 </Button>
                 <Button size="sm" asChild>
                   <Link to="/login" onClick={() => setMobileOpen(false)}>تسجيل دخول</Link>
