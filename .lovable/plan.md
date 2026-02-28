@@ -1,101 +1,66 @@
 
 
-## خطة إعادة تنظيم المنصة: بوابة الكيانات + بوابة الكوادر
+## خطة تطوير الموقع العام لمنصة كوادر
 
-### ملخص التغييرات
+### المشكلة الرئيسية
+المسار `/talents` محجوز حالياً كـ protected layout للكوادر. يجب نقل الـ protected layout إلى `/talents/app/*` أو إعادة هيكلة بحيث `/talents` العام يكون صفحة مستقلة والمسارات المحمية تبقى كـ nested routes.
 
-تحويل المسارات والمسميات من النظام الحالي (`/org/*`, `/job-seeker/*`, "جمعية", "باحث عن وظيفة") إلى النظام الجديد (`/portal/*`, `/talents/*`, "كيانات", "كوادر") مع إضافة صفحات جديدة وتحسين الهيدر.
+### الحل
+- `/talents` = صفحة عامة (كوادر القطاع)
+- `/talents/dashboard`, `/talents/profile`, etc. = مسارات محمية داخل TalentsLayout
+- يتم التفريق في `App.tsx` بوضع الصفحة العامة كـ route مستقل قبل الـ protected layout
 
-### التفاصيل التقنية
+---
 
-#### 1. تحديث قاعدة البيانات
-- لا تغيير على الأدوار الحالية — `job_seeker` يبقى كما هو تقنياً (يُعرض كـ"كوادر" في الواجهة فقط)
-- إضافة أعمدة جديدة لجدول `job_seeker_profiles`: `summary`, `education`, `certifications`, `job_preferences`, `profile_completion_percentage`
+### التغييرات
 
-#### 2. تحديث `src/lib/roles.ts`
-- تحديث `getRedirectPath()` لاستخدام المسارات الجديدة (`/portal/dashboard`, `/talents/dashboard`)
-- تحديث المسميات
+#### 1. إنشاء 8 صفحات عامة جديدة
 
-#### 3. إعادة هيكلة المسارات في `App.tsx`
+| الصفحة | المسار | المحتوى |
+|--------|--------|---------|
+| عن المنصة | `/about` | تعريف، رؤية، أرقام |
+| دليل الجمعيات | `/ngos` | قائمة من `organizations` (active) + فلاتر مدينة |
+| تفاصيل جمعية | `/ngos/:slug` | بيانات + وظائف مفتوحة |
+| كوادر القطاع | `/talents-public` | بطاقات عامة من `job_seeker_profiles` + CTAs |
+| بوابة الكيانات | `/portal-landing` | صفحة هبوط + CTAs |
+| بوابة الكوادر | `/talents-portal` | صفحة هبوط + CTAs |
+| باقات الأسعار | `/pricing` | الباقات من `plans` |
+| اتصل بنا | `/contact` | نموذج تواصل |
 
-```text
-القديم                    → الجديد
-/org/dashboard            → /portal/dashboard
-/org/pending              → /portal/pending
-/job-seeker/dashboard     → /talents/dashboard
-```
+ملاحظة: `/talents` محجوز للـ protected layout، لذا الصفحة العامة ستكون `/talents-public`.
 
-إضافة مسارات جديدة:
-- `/portal/jobs`, `/portal/jobs/new`, `/portal/applications`, `/portal/team`, `/portal/billing`, `/portal/settings`
-- `/talents/profile`, `/talents/applications`, `/talents/settings`
+#### 2. تحديث `Navbar.tsx`
+- روابط عامة: الرئيسية `/`، عن المنصة `/about`، دليل الجمعيات `/ngos`، كوادر القطاع `/talents-public`، الأسعار `/pricing`، اتصل بنا `/contact`
+- أزرار: بوابة الكيانات `/portal-landing`، بوابة الكوادر `/talents-portal`، تسجيل دخول
+- مسجل: أزرار حسب الدور
 
-#### 4. إنشاء Portal Layout + Sidebar
-- `src/components/portal/PortalLayout.tsx` — layout مع sidebar للكيانات
-- `src/components/portal/PortalSidebar.tsx` — sidebar مع روابط (لوحة التحكم، الوظائف، الطلبات، الفريق، الاشتراك، الإعدادات)
+#### 3. تحديث `Footer.tsx`
+- تحديث البراند من "وظائف" إلى "كوادر"
+- تحديث الروابط
 
-#### 5. إنشاء Talents Layout + Sidebar
-- `src/components/talents/TalentsLayout.tsx`
-- `src/components/talents/TalentsSidebar.tsx` — (لوحة التحكم، الملف المهني، طلباتي، الإعدادات)
+#### 4. تحديث `App.tsx`
+- إضافة 8 مسارات عامة جديدة
 
-#### 6. إنشاء/نقل الصفحات
+#### 5. تحديث محتوى موجود
+- `OrgsSection.tsx`: تحديث الروابط إلى `/ngos/`
+- `CTASection.tsx`: تحديث النصوص
+- `HeroSection.tsx`: تحديث لهوية "كوادر"
 
-**بوابة الكيانات (Portal):**
-- `src/pages/portal/PortalDashboard.tsx` — نقل من OrgDashboard مع تحديث المسميات
-- `src/pages/portal/PortalPending.tsx` — نقل من OrgPending
-- `src/pages/portal/PortalJobs.tsx` — قائمة وظائف الكيان (هيكل أساسي)
-- `src/pages/portal/PortalNewJob.tsx` — نموذج إضافة وظيفة (هيكل أساسي)
-- `src/pages/portal/PortalApplications.tsx` — الطلبات الواردة (هيكل أساسي)
-- `src/pages/portal/PortalTeam.tsx` — إدارة الفريق (هيكل أساسي)
-- `src/pages/portal/PortalBilling.tsx` — الاشتراك والفواتير (هيكل أساسي)
-- `src/pages/portal/PortalSettings.tsx` — إعدادات الكيان (هيكل أساسي)
+#### 6. إضافة RLS policy
+- إضافة policy عامة للقراءة على `job_seeker_profiles` (بيانات عامة فقط عبر view أو select محدود)
+- إضافة policy عامة لقراءة `organizations` النشطة (موجودة بالفعل)
 
-**بوابة الكوادر (Talents):**
-- `src/pages/talents/TalentsDashboard.tsx` — نقل من JobSeekerDashboard
-- `src/pages/talents/TalentsProfile.tsx` — الملف المهني الكامل (الحقول الجديدة)
-- `src/pages/talents/TalentsApplications.tsx` — طلباتي (هيكل أساسي)
-- `src/pages/talents/TalentsSettings.tsx` — الإعدادات (هيكل أساسي)
+#### 7. Migration
+- إضافة عمود `slug` لجدول `organizations` إذا لم يكن مفعّلاً
+- إضافة RLS policy لعرض الملفات العامة للكوادر
 
-#### 7. تحديث `Register.tsx`
-- تغيير المسميات: "باحث عن وظيفة" → "حساب كوادر"، "جمعية / مؤسسة" → "حساب كيان"
-- تحديث التوجيه بعد التسجيل: كوادر → `/talents/profile`، كيان → `/portal/pending` أو `/portal/dashboard`
+---
 
-#### 8. تحديث `Login.tsx`
-- تحديث مسارات التوجيه بعد الدخول
-- كوادر: فحص اكتمال الملف المهني → `/talents/profile` أو `/talents/dashboard`
+### الملفات
 
-#### 9. تحديث `Navbar.tsx`
-- **غير مسجل:** "بوابة الكيانات" + "بوابة الكوادر" + "تسجيل دخول"
-- **كوادر:** "لوحة الكوادر" + dropdown (الملف المهني، طلباتي، خروج)
-- **كيان:** "لوحة الكيانات" + "نشر وظيفة"
-- **مدير:** "لوحة تحكم المنصة"
+**جديدة (8):**
+`src/pages/About.tsx`, `src/pages/NGOsDirectory.tsx`, `src/pages/NGOProfile.tsx`, `src/pages/TalentsPublic.tsx`, `src/pages/PortalLanding.tsx`, `src/pages/TalentsPortalLanding.tsx`, `src/pages/Pricing.tsx`, `src/pages/Contact.tsx`
 
-#### 10. تحديث `UserMenu.tsx`
-- تحديث مسارات التوجيه والمسميات
-
-#### 11. تحديث `AdminSidebar.tsx`
-- تغيير "إدارة الجمعيات" → "إدارة الكيانات"
-- المسار يبقى `/admin/organizations`
-
-#### 12. تحديث `ProtectedRoute.tsx`
-- لا تغيير تقني — الأدوار نفسها، فقط المسارات تتغير في `App.tsx`
-
-### الملفات المتأثرة
-
-**جديدة (~14 ملف):**
-- `src/components/portal/PortalLayout.tsx`, `PortalSidebar.tsx`
-- `src/components/talents/TalentsLayout.tsx`, `TalentsSidebar.tsx`
-- `src/pages/portal/` (8 ملفات)
-- `src/pages/talents/` (4 ملفات)
-
-**معدّلة:**
-- `src/App.tsx`, `src/pages/Register.tsx`, `src/pages/Login.tsx`
-- `src/components/layout/Navbar.tsx`, `src/components/layout/UserMenu.tsx`
-- `src/lib/roles.ts`, `src/components/admin/AdminSidebar.tsx`
-
-**محذوفة:**
-- `src/pages/org/OrgDashboard.tsx`, `src/pages/org/OrgPending.tsx`
-- `src/pages/job-seeker/JobSeekerDashboard.tsx`
-
-**Migration:**
-- إضافة أعمدة `summary`, `education`, `certifications`, `job_preferences`, `profile_completion_percentage` لجدول `job_seeker_profiles`
+**معدّلة (6):**
+`src/App.tsx`, `src/components/layout/Navbar.tsx`, `src/components/layout/Footer.tsx`, `src/components/home/OrgsSection.tsx`, `src/components/home/CTASection.tsx`, `src/components/home/HeroSection.tsx`
 
