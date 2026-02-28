@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
@@ -54,91 +55,93 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetails />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/register/talent" element={<TalentRegister />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/forbidden" element={<Forbidden />} />
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/jobs/:id" element={<JobDetails />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/register/talent" element={<TalentRegister />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/forbidden" element={<Forbidden />} />
 
-            {/* Public pages */}
-            <Route path="/about" element={<About />} />
-            <Route path="/ngos" element={<NGOsDirectory />} />
-            <Route path="/ngos/:slug" element={<NGOProfile />} />
-            <Route path="/talents-public" element={<TalentsPublic />} />
-            <Route path="/portal-landing" element={<PortalLanding />} />
-            <Route path="/talents-portal" element={<TalentsPortalLanding />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
+              {/* Public pages */}
+              <Route path="/about" element={<About />} />
+              <Route path="/ngos" element={<NGOsDirectory />} />
+              <Route path="/ngos/:slug" element={<NGOProfile />} />
+              <Route path="/talents-public" element={<TalentsPublic />} />
+              <Route path="/portal-landing" element={<PortalLanding />} />
+              <Route path="/talents-portal" element={<TalentsPortalLanding />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/contact" element={<Contact />} />
 
-            {/* Admin routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={["super_admin", "admin", "moderator"]}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<AdminDashboard />} />
-              <Route path="jobs" element={<AdminJobs />} />
-              <Route path="organizations" element={<AdminOrganizations />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="subscriptions" element={<AdminSubscriptions />} />
-              <Route path="categories" element={<AdminCategories />} />
-              <Route path="ngos/reviews" element={<AdminNGOReviews />} />
-            </Route>
+              {/* Admin routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={["super_admin", "admin", "moderator"]}>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<AdminDashboard />} />
+                <Route path="jobs" element={<AdminJobs />} />
+                <Route path="organizations" element={<AdminOrganizations />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="subscriptions" element={<AdminSubscriptions />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="ngos/reviews" element={<AdminNGOReviews />} />
+              </Route>
 
-            {/* Portal (Entity) routes */}
-            <Route path="/portal/pending" element={
-              <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
-                <PortalPending />
-              </ProtectedRoute>
-            } />
-            <Route path="/portal" element={
-              <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
-                <PortalLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<PortalDashboard />} />
-              <Route path="jobs" element={<PortalJobs />} />
-              <Route path="jobs/new" element={<PortalNewJob />} />
-              <Route path="applications" element={<PortalApplications />} />
-              <Route path="team" element={<PortalTeam />} />
-              <Route path="billing" element={<PortalBilling />} />
-              <Route path="settings" element={<PortalSettings />} />
-              <Route path="profile" element={<PortalProfile />} />
-              <Route path="profile/setup" element={<PortalProfileSetup />} />
-              <Route path="profile/preview" element={<PortalProfilePreview />} />
-              <Route path="profile/submission" element={<PortalProfileSubmission />} />
-              <Route path="profile/status" element={<PortalProfileStatus />} />
-            </Route>
+              {/* Portal (Entity) routes */}
+              <Route path="/portal/pending" element={
+                <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
+                  <PortalPending />
+                </ProtectedRoute>
+              } />
+              <Route path="/portal" element={
+                <ProtectedRoute allowedRoles={["org_owner", "org_hr_manager", "org_viewer"]}>
+                  <PortalLayout />
+                </ProtectedRoute>
+              }>
+                <Route path="dashboard" element={<PortalDashboard />} />
+                <Route path="jobs" element={<PortalJobs />} />
+                <Route path="jobs/new" element={<PortalNewJob />} />
+                <Route path="applications" element={<PortalApplications />} />
+                <Route path="team" element={<PortalTeam />} />
+                <Route path="billing" element={<PortalBilling />} />
+                <Route path="settings" element={<PortalSettings />} />
+                <Route path="profile" element={<PortalProfile />} />
+                <Route path="profile/setup" element={<PortalProfileSetup />} />
+                <Route path="profile/preview" element={<PortalProfilePreview />} />
+                <Route path="profile/submission" element={<PortalProfileSubmission />} />
+                <Route path="profile/status" element={<PortalProfileStatus />} />
+              </Route>
 
-            {/* Talents routes */}
-            <Route path="/talents" element={
-              <ProtectedRoute allowedRoles={["job_seeker"]}>
-                <TalentsLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<TalentsDashboard />} />
-              <Route path="profile" element={<TalentsProfile />} />
-              <Route path="applications" element={<TalentsApplications />} />
-              <Route path="settings" element={<TalentsSettings />} />
-            </Route>
+              {/* Talents routes */}
+              <Route path="/talents" element={
+                <ProtectedRoute allowedRoles={["job_seeker"]}>
+                  <TalentsLayout />
+                </ProtectedRoute>
+              }>
+                <Route path="dashboard" element={<TalentsDashboard />} />
+                <Route path="profile" element={<TalentsProfile />} />
+                <Route path="applications" element={<TalentsApplications />} />
+                <Route path="settings" element={<TalentsSettings />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

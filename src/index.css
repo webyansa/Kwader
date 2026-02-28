@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    /* Kwader Premium Identity — Deep Indigo Navy + Emerald Muted */
-    --background: 228 33% 97%;
-    --foreground: 226 47% 24%;
+    /* Kwader Premium — Light Theme */
+    --background: 228 33% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 226 47% 24%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 226 47% 24%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 226 50% 24%;
+    --primary: 231 50% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 30% 95%;
-    --secondary-foreground: 226 47% 20%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
 
-    --muted: 228 25% 93%;
-    --muted-foreground: 225 15% 50%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
     --accent: 162 64% 33%;
     --accent-foreground: 0 0% 100%;
@@ -29,13 +29,13 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 225 25% 91%;
-    --input: 225 25% 91%;
-    --ring: 226 50% 24%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 231 50% 40%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
 
-    /* Custom semantic tokens */
+    /* Semantic */
     --highlight: 249 100% 69%;
     --highlight-foreground: 0 0% 100%;
     --urgent: 0 84% 60%;
@@ -45,46 +45,57 @@
     --success: 162 64% 33%;
     --success-foreground: 0 0% 100%;
 
-    /* Sidebar */
-    --sidebar-background: 226 50% 24%;
-    --sidebar-foreground: 228 30% 85%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 226 50% 24%;
-    --sidebar-accent: 226 40% 30%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 226 40% 28%;
+    /* Sidebar — Light Slate */
+    --sidebar-background: 210 40% 96%;
+    --sidebar-foreground: 217 33% 17%;
+    --sidebar-primary: 231 50% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 217 33% 17%;
+    --sidebar-border: 214 20% 90%;
     --sidebar-ring: 162 64% 33%;
   }
 
   .dark {
-    --background: 226 47% 7%;
-    --foreground: 228 25% 92%;
-    --card: 226 40% 10%;
-    --card-foreground: 228 25% 92%;
-    --popover: 226 40% 10%;
-    --popover-foreground: 228 25% 92%;
-    --primary: 228 60% 70%;
-    --primary-foreground: 226 47% 7%;
-    --secondary: 226 30% 15%;
-    --secondary-foreground: 228 25% 92%;
-    --muted: 226 25% 16%;
-    --muted-foreground: 225 15% 55%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 224 64% 65%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 217 33% 13%;
+    --secondary-foreground: 210 40% 80%;
+
+    --muted: 217 33% 13%;
+    --muted-foreground: 215 20% 55%;
+
     --accent: 162 55% 45%;
-    --accent-foreground: 226 47% 7%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 228 25% 92%;
-    --border: 226 25% 18%;
-    --input: 226 25% 18%;
-    --ring: 228 60% 70%;
+    --accent-foreground: 222 47% 6%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 20% 16%;
+    --input: 217 20% 16%;
+    --ring: 224 64% 65%;
+
     --highlight: 249 85% 72%;
     --highlight-foreground: 0 0% 100%;
-    --sidebar-background: 226 47% 9%;
-    --sidebar-foreground: 228 25% 80%;
-    --sidebar-primary: 228 60% 70%;
+
+    /* Sidebar — Dark */
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 215 20% 70%;
+    --sidebar-primary: 224 64% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 226 30% 14%;
-    --sidebar-accent-foreground: 228 25% 90%;
-    --sidebar-border: 226 25% 16%;
+    --sidebar-accent: 217 25% 14%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 217 20% 14%;
     --sidebar-ring: 162 55% 45%;
   }
 }
@@ -106,17 +117,15 @@
 }
 
 @layer utilities {
-  /* Premium card hover */
   .card-hover {
-    @apply transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5;
+    @apply transition-all duration-200 ease-out hover:shadow-card-hover hover:-translate-y-0.5;
   }
 
-  /* Subtle gradient backgrounds */
   .bg-gradient-hero {
-    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(228 33% 95%) 50%, hsl(var(--background)) 100%);
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(220 14% 95%) 50%, hsl(var(--background)) 100%);
   }
 
   .bg-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(226 50% 30%) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(231 50% 48%) 100%);
   }
 }
