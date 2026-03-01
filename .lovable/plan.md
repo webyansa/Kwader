@@ -1,75 +1,79 @@
 
 
-# خطة تنفيذ نموذج نشر الوظائف الاحترافي مع الذكاء الاصطناعي
+## خطة ترقية صفحة السيرة الذاتية العامة (PublicCV.tsx) إلى قالب Premium
 
-## ملخص
-إعادة بناء نموذج إنشاء الوظيفة كمعالج من 5 أقسام مع حقول احترافية جديدة، ودعم توليد المحتوى بالذكاء الاصطناعي (Lovable AI / Gemini)، وحفظ تلقائي، ومعاينة حية، وربط بسير الموافقات.
+### ملخص التغييرات
+إعادة بناء كاملة لملف `src/pages/PublicCV.tsx` ليصبح قالب سيرة ذاتية احترافي بتصميم عصري مع دعم كامل للطباعة والتصدير PDF.
 
 ---
 
-## التفاصيل التقنية
+### التفاصيل التقنية
 
-### 1. تحديث قاعدة البيانات (Migration)
+#### 1. إعادة هيكلة التخطيط (Layout)
+- **الخلفية**: تدرج ناعم `bg-gradient-to-b from-slate-50 via-white to-slate-50`
+- **Canvas أبيض**: بطاقة مركزية بعرض `max-w-[900px]` وظل premium وزوايا `rounded-2xl`
+- **Grid عمودين**: Desktop `grid-cols-[1fr_320px]` (65%/35%) — Mobile عمود واحد
+- **شريط أدوات ثابت**: `sticky top-0` خارج الـ CV يحتوي أزرار التحميل/المشاركة/الطباعة/الرجوع
 
-إضافة أعمدة جديدة لجدول `jobs`:
-- `department` (text, nullable) — القسم/الإدارة
-- `summary` (text, nullable) — ملخص سريع
-- `skills` (text[], default '{}') — مهارات
-- `vacancies` (integer, default 1) — عدد الشواغر
-- `experience_years_min` (integer, nullable)
-- `experience_years_max` (integer, nullable)
-- `education` (text, nullable) — المؤهل العلمي
-- `languages` (jsonb, default '[]') — اللغات
-- `salary_display` (text, default 'hidden') — عرض الراتب (hidden/range/visible)
-- `benefits` (text[], default '{}') — المزايا
-- `screening_questions` (jsonb, default '[]') — أسئلة الفرز
+#### 2. Header داخل الـ CV
+- Avatar بحجم `h-28 w-28` مع `ring-4` تدرج AI (`from-indigo-500 via-purple-500 to-cyan-400`)
+- الاسم بخط `text-4xl font-black`
+- Headline تحته بـ `text-lg text-muted-foreground`
+- سطر معلومات (المدينة + LinkedIn + Portfolio) بأيقونات `18px`
+- Fallback avatar: حرف أول مع gradient
 
-تحديث enum `employment_type` بإضافة: `consultant`, `volunteer`
-تحديث enum `experience_level` بإضافة: `leadership`
+#### 3. QR Card احترافي (في الشريط الجانبي)
+- بطاقة مستقلة بعنوان "ملفي على كوادر"
+- QR داخل إطار مع رابط قصير أسفله
+- زر "نسخ الرابط" صغير
+- QR يشير إلى `/talent/{username}` (الملف العام وليس CV)
 
-### 2. Edge Function للذكاء الاصطناعي
+#### 4. أقسام السيرة (Sections) بأيقونات موحدة
+كل قسم = Block بعنوان + أيقونة Lucide بحجم `18px`:
+- `User` → النبذة المهنية
+- `Briefcase` → الخبرات (timeline بخط عمودي + نقاط)
+- `GraduationCap` → التعليم
+- `BadgeCheck` → الشهادات
+- `Sparkles` → المهارات (chips صغيرة بحدود خفيفة)
+- `FolderGit2` → المشاريع
+- `HeartHandshake` → التطوع
+- `Globe` → الروابط
 
-إنشاء `supabase/functions/generate-job-content/index.ts`:
-- يستقبل: title, department, city, remote_type, employment_type, experience_level, skills, org_short_description
-- يرسل إلى Lovable AI Gateway (gemini-3-flash-preview)
-- System prompt مخصص للقطاع غير الربحي السعودي
-- يُرجع: summary, description, responsibilities, requirements, suggested_skills
-- دعم أنماط (مختصر / تفصيلي / مهني راقٍ / رسمي)
-- دعم إعادة صياغة قسم محدد (rewrite)
-- Non-streaming response عبر `supabase.functions.invoke()`
+#### 5. مهارات محسّنة (Chips)
+- حجم أصغر، حدود خفيفة `border border-indigo-200/60`
+- خلفية `bg-indigo-50/50`
+- Hover يُظهر tooltip إن توفرت بيانات إضافية
 
-تحديث `supabase/config.toml` بإضافة الدالة مع `verify_jwt = false`
+#### 6. Print CSS
+إضافة styles طباعة في `index.css`:
+```css
+@media print {
+  .print\\:hidden { display: none !important; }
+  body { background: white !important; }
+  .cv-canvas { box-shadow: none !important; border: none !important; }
+  section { break-inside: avoid; }
+  @page { size: A4; margin: 15mm; }
+}
+```
 
-### 3. إعادة بناء `PortalNewJob.tsx` بالكامل
+#### 7. تصدير PDF
+- استخدام `html2canvas` + `jspdf` الموجودين
+- اسم الملف: `kwader-{username}-cv.pdf`
+- جودة A4 عالية
 
-**5 أقسام Stepper:**
-1. **البيانات الأساسية** — المسمى، القسم، المنطقة+المدينة، نمط العمل، نوع الدوام، المستوى، عدد الشواغر، تاريخ الإغلاق
-2. **تفاصيل الوظيفة (AI)** — ملخص، وصف (Rich Text area)، مسؤوليات، متطلبات، مهارات (tags)، سنوات الخبرة، مؤهل، لغات. زر AI لتوليد المحتوى + إعادة توليد بأنماط + تحسين صياغة
-3. **الراتب والمزايا** — عرض الراتب (select)، نطاق، مزايا (tags)
-4. **أسئلة الفرز** — أسئلة نعم/لا، سؤال نصي، خيار رفع ملف
-5. **المراجعة والمعاينة** — Preview كامل + تحذير + أزرار حفظ/إرسال
+#### 8. Footer Branding
+- سطر هادئ `text-[10px]` رمادي فاتح
+- "تم إنشاء هذه السيرة عبر منصة كوادر · www.kawader.sa"
 
-**وظائف إضافية:**
-- Auto-save إلى localStorage عند كل تغيير
-- حفظ كمسودة (INSERT/UPDATE في jobs مع status=draft)
-- إرسال للاعتماد (status=submitted) مع validation
-- Live Preview sidebar (lg screens)
-- جلب بيانات الجمعية (org_id, short_description) لتغذية AI
+#### 9. Empty States ذكية
+- أقسام فارغة لا تظهر (كما هو حالياً)
+- إذا كان المستخدم هو المالك: عرض رسالة "أضف خبرة لتقوية ملفك" + رابط للبوابة (تحسين مستقبلي)
 
-### 4. تكامل الذكاء الاصطناعي في الواجهة
+---
 
-- زر "✨ توليد بالذكاء الاصطناعي" في القسم 2
-- Modal يعرض حالة التوليد (loading)
-- ملء الحقول تلقائياً بالنتائج
-- زر "إعادة توليد" مع dropdown لاختيار الأسلوب
-- زر "تحسين الصياغة" لكل حقل نصي منفرد
-
-### 5. الملفات المتأثرة
-
-| ملف | عملية |
+### الملفات المتأثرة
+| الملف | التغيير |
 |---|---|
-| Migration SQL | إنشاء |
-| `supabase/functions/generate-job-content/index.ts` | إنشاء |
-| `supabase/config.toml` | تحديث |
-| `src/pages/portal/PortalNewJob.tsx` | إعادة بناء كامل |
+| `src/pages/PublicCV.tsx` | إعادة بناء كاملة |
+| `src/index.css` | إضافة print styles |
 
