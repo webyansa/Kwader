@@ -3,6 +3,8 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
+import ContactFormModal from "@/components/talents/ContactFormModal";
+import LoginPromptModal from "@/components/talents/LoginPromptModal";
 import { QRCodeCanvas } from "qrcode.react";
 import { differenceInDays } from "date-fns";
 import {
@@ -17,7 +19,7 @@ import {
   FolderOpen,
   QrCode,
   ExternalLink,
-  Shield,
+  Shield, MessageSquare,
   FileText,
   Copy,
   CheckCircle2,
@@ -54,6 +56,8 @@ const PublicProfile = () => {
   const getOrCreateThread = useGetOrCreateThread();
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const normalizedUsername = (username || "").toLowerCase();
   const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/talent/${normalizedUsername}` : `https://www.kawader.sa/talent/${normalizedUsername}`;
@@ -274,28 +278,48 @@ const PublicProfile = () => {
                     </div>
                   )}
 
-                  <Button
-                    className="w-full rounded-xl gap-2"
-                    variant={allowContact ? "default" : "outline"}
-                    disabled={!allowContact || getOrCreateThread.isPending}
-                    onClick={() => {
-                      if (!user) {
-                        navigate("/login");
-                        return;
-                      }
-                      if (!profile?.user_id) return;
-                      getOrCreateThread.mutate(profile.user_id, {
-                        onSuccess: (threadId) => {
-                          navigate(`/messages?thread=${threadId}`);
-                        },
-                        onError: () => {
-                          toast({ title: "حدث خطأ", description: "لم نتمكن من بدء المحادثة", variant: "destructive" });
-                        },
-                      });
-                    }}
-                  >
-                    <Mail className="h-4 w-4" />{allowContact ? "راسلني عبر كوادر" : "المراسلة غير مفعلة"}
-                  </Button>
+                  {/* Chat button - only for logged in users */}
+                  {user && allowContact && (
+                    <Button
+                      className="w-full rounded-xl gap-2"
+                      disabled={getOrCreateThread.isPending}
+                      onClick={() => {
+                        if (!profile?.user_id) return;
+                        getOrCreateThread.mutate(profile.user_id, {
+                          onSuccess: (threadId) => {
+                            navigate(`/talents/messages?tab=chats`);
+                          },
+                          onError: () => {
+                            toast({ title: "حدث خطأ", description: "لم نتمكن من بدء المحادثة", variant: "destructive" });
+                          },
+                        });
+                      }}
+                    >
+                      <Mail className="h-4 w-4" />مراسلة عبر كوادر
+                    </Button>
+                  )}
+
+                  {/* Chat button for non-logged in - shows login prompt */}
+                  {!user && allowContact && (
+                    <Button
+                      className="w-full rounded-xl gap-2"
+                      variant="outline"
+                      onClick={() => setShowLoginPrompt(true)}
+                    >
+                      <Mail className="h-4 w-4" />مراسلة عبر كوادر
+                    </Button>
+                  )}
+
+                  {/* Contact form button - available for everyone */}
+                  {allowContact && (
+                    <Button
+                      className="w-full rounded-xl gap-2"
+                      variant="secondary"
+                      onClick={() => setShowContactForm(true)}
+                    >
+                      <MessageSquare className="h-4 w-4" />تواصل معي
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -463,6 +487,19 @@ const PublicProfile = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Contact Form Modal */}
+      {profile && (
+        <ContactFormModal
+          open={showContactForm}
+          onOpenChange={setShowContactForm}
+          talentUserId={profile.user_id}
+          talentName={profile.full_name || "الكادر"}
+        />
+      )}
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       <Footer />
     </div>

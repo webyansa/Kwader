@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isPlatformStaff, isOrganization, isJobSeeker } from "@/lib/roles";
 import { useUnreadCount } from "@/hooks/useMessages";
+import { useNewContactCount } from "@/hooks/useContactMessages";
 import UserMenu from "./UserMenu";
 
 const publicLinks = [
@@ -22,6 +23,8 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, roles, loading } = useAuth();
   const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: newContactCount = 0 } = useNewContactCount();
+  const totalUnread = unreadCount + newContactCount;
 
   const isLoggedIn = !!user;
   const staff = isPlatformStaff(roles);
@@ -74,11 +77,11 @@ const Navbar = () => {
                   <Link to="/talents/dashboard">لوحة الكوادر</Link>
                 </Button>
               )}
-              <Link to="/messages" className="relative p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors">
+              <Link to={seeker ? "/talents/messages" : "/messages"} className="relative p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors">
                 <MessageSquare className="h-5 w-5" />
-                {unreadCount > 0 && (
+                {totalUnread > 0 && (
                   <Badge className="absolute -top-1 -left-1 h-4 min-w-4 rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
-                    {unreadCount > 9 ? "9+" : unreadCount}
+                    {totalUnread > 9 ? "9+" : totalUnread}
                   </Badge>
                 )}
               </Link>

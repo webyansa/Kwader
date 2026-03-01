@@ -1,7 +1,10 @@
-import { LayoutDashboard, User, FileText, Settings, LogOut, Palette } from "lucide-react";
+import { LayoutDashboard, User, FileText, Settings, LogOut, Palette, MessageSquare } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useNewContactCount } from "@/hooks/useContactMessages";
+import { useUnreadCount } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -12,6 +15,7 @@ const mainItems = [
   { title: "لوحة التحكم", url: "/talents/dashboard", icon: LayoutDashboard },
   { title: "الملف المهني", url: "/talents/profile", icon: User },
   { title: "استوديو CV", url: "/talents/cv", icon: Palette },
+  { title: "الرسائل", url: "/talents/messages", icon: MessageSquare, hasBadge: true },
   { title: "طلباتي", url: "/talents/applications", icon: FileText },
   { title: "الإعدادات", url: "/talents/settings/privacy", icon: Settings },
 ];
@@ -20,6 +24,9 @@ const TalentsSidebar = () => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { signOut } = useAuth();
+  const { data: newContactCount = 0 } = useNewContactCount();
+  const { data: unreadChatCount = 0 } = useUnreadCount();
+  const totalBadge = newContactCount + unreadChatCount;
 
   return (
     <Sidebar collapsible="icon" side="right" className="border-l-0 border-r">
@@ -47,6 +54,11 @@ const TalentsSidebar = () => {
                     <NavLink to={item.url} end={item.url === "/talents/dashboard"} className="hover:bg-sidebar-accent/50 transition-colors" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
                       <item.icon className="ml-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
+                      {(item as any).hasBadge && totalBadge > 0 && (
+                        <Badge className="mr-auto h-5 min-w-5 rounded-full bg-destructive px-1.5 text-[10px] text-destructive-foreground">
+                          {totalBadge > 9 ? "9+" : totalBadge}
+                        </Badge>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

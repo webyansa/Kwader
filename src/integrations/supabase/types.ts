@@ -88,6 +88,51 @@ export type Database = {
           },
         ]
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          sender_email: string
+          sender_name: string
+          sender_phone: string | null
+          sender_type: string
+          sender_user_id: string | null
+          status: string
+          subject: string | null
+          talent_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          message_type?: string
+          sender_email: string
+          sender_name: string
+          sender_phone?: string | null
+          sender_type?: string
+          sender_user_id?: string | null
+          status?: string
+          subject?: string | null
+          talent_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          sender_email?: string
+          sender_name?: string
+          sender_phone?: string | null
+          sender_type?: string
+          sender_user_id?: string | null
+          status?: string
+          subject?: string | null
+          talent_user_id?: string
+        }
+        Relationships: []
+      }
       cv_exports: {
         Row: {
           created_at: string
