@@ -129,3 +129,13 @@
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(231 50% 48%) 100%);
   }
 }
+
+/* ── Print Styles for CV ── */
+@media print {
+  .print\:hidden { display: none !important; }
+  body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .cv-canvas { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+  .cv-section { break-inside: avoid; }
+  @page { size: A4; margin: 15mm; }
+  nav, footer:not(.cv-canvas footer) { display: none !important; }
+}
