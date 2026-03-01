@@ -1,79 +1,103 @@
 
 
-## خطة ترقية صفحة السيرة الذاتية العامة (PublicCV.tsx) إلى قالب Premium
+## خطة بناء نظام التواصل المزدوج (Chat + Contact Form)
 
-### ملخص التغييرات
-إعادة بناء كاملة لملف `src/pages/PublicCV.tsx` ليصبح قالب سيرة ذاتية احترافي بتصميم عصري مع دعم كامل للطباعة والتصدير PDF.
+### ملخص
+تحويل نظام المراسلات الحالي إلى نظامين منفصلين: (A) محادثات لحظية للمستخدمين المسجلين، (B) نموذج تواصل للزوار مع صندوق وارد في لوحة تحكم الكادر.
 
 ---
 
-### التفاصيل التقنية
+### 1. قاعدة البيانات (Migration)
 
-#### 1. إعادة هيكلة التخطيط (Layout)
-- **الخلفية**: تدرج ناعم `bg-gradient-to-b from-slate-50 via-white to-slate-50`
-- **Canvas أبيض**: بطاقة مركزية بعرض `max-w-[900px]` وظل premium وزوايا `rounded-2xl`
-- **Grid عمودين**: Desktop `grid-cols-[1fr_320px]` (65%/35%) — Mobile عمود واحد
-- **شريط أدوات ثابت**: `sticky top-0` خارج الـ CV يحتوي أزرار التحميل/المشاركة/الطباعة/الرجوع
+**جدول جديد: `contact_messages`**
+- `id`, `talent_user_id`, `sender_type` (visitor/logged_in), `sender_user_id` (nullable), `sender_name`, `sender_email`, `sender_phone`, `subject`, `message_type` (توظيف/استشارة/خدمة/تعاون/أخرى), `message`, `status` (new/read/replied/archived), `created_at`
+- RLS: الكادر المستلم يقرأ/يحدّث رسائله، الجميع يمكنهم الإدراج (insert)، الأدمن يرى الكل
 
-#### 2. Header داخل الـ CV
-- Avatar بحجم `h-28 w-28` مع `ring-4` تدرج AI (`from-indigo-500 via-purple-500 to-cyan-400`)
-- الاسم بخط `text-4xl font-black`
-- Headline تحته بـ `text-lg text-muted-foreground`
-- سطر معلومات (المدينة + LinkedIn + Portfolio) بأيقونات `18px`
-- Fallback avatar: حرف أول مع gradient
+**تعديل الجداول الحالية:**
+- إعادة تسمية `messages_threads` → تبقى كما هي (ستُستخدم كـ chat_threads)
+- إعادة تسمية `messages` → تبقى كما هي (ستُستخدم كـ chat_messages)
+- لا حاجة لتغيير هيكلي، فقط إضافة الجدول الجديد
 
-#### 3. QR Card احترافي (في الشريط الجانبي)
-- بطاقة مستقلة بعنوان "ملفي على كوادر"
-- QR داخل إطار مع رابط قصير أسفله
-- زر "نسخ الرابط" صغير
-- QR يشير إلى `/talent/{username}` (الملف العام وليس CV)
+**إضافة Realtime:**
+- `ALTER PUBLICATION supabase_realtime ADD TABLE contact_messages;`
 
-#### 4. أقسام السيرة (Sections) بأيقونات موحدة
-كل قسم = Block بعنوان + أيقونة Lucide بحجم `18px`:
-- `User` → النبذة المهنية
-- `Briefcase` → الخبرات (timeline بخط عمودي + نقاط)
-- `GraduationCap` → التعليم
-- `BadgeCheck` → الشهادات
-- `Sparkles` → المهارات (chips صغيرة بحدود خفيفة)
-- `FolderGit2` → المشاريع
-- `HeartHandshake` → التطوع
-- `Globe` → الروابط
+---
 
-#### 5. مهارات محسّنة (Chips)
-- حجم أصغر، حدود خفيفة `border border-indigo-200/60`
-- خلفية `bg-indigo-50/50`
-- Hover يُظهر tooltip إن توفرت بيانات إضافية
+### 2. صفحة الكادر العامة (`PublicProfile.tsx`)
 
-#### 6. Print CSS
-إضافة styles طباعة في `index.css`:
-```css
-@media print {
-  .print\\:hidden { display: none !important; }
-  body { background: white !important; }
-  .cv-canvas { box-shadow: none !important; border: none !important; }
-  section { break-inside: avoid; }
-  @page { size: A4; margin: 15mm; }
-}
+تعديل أزرار التواصل في الـ sidebar:
+- **"مراسلة عبر كوادر"** → يظهر فقط إذا المستخدم مسجل دخول (يفتح chat thread)
+- **"تواصل معي"** → متاح للجميع، يفتح Modal نموذج التواصل
+- إذا الزائر غير مسجل وضغط "مراسلة عبر كوادر" → Modal يطلب تسجيل الدخول
+
+---
+
+### 3. نموذج التواصل (Contact Form Modal)
+
+مكون جديد: `src/components/talents/ContactFormModal.tsx`
+- حقول: الاسم، البريد، الجوال (اختياري مع تنسيق سعودي)، نوع الرسالة (dropdown)، عنوان مختصر، نص الرسالة
+- تحويل `05` → `+966` تلقائياً
+- Validation بـ zod
+- حفظ في `contact_messages` مع `status=new`
+- Toast نجاح بعد الإرسال
+- Hint: "المراسلات المباشرة تتطلب تسجيل دخول"
+
+---
+
+### 4. لوحة تحكم الكادر: إدارة الرسائل
+
+**صفحة جديدة: `src/pages/talents/TalentsMessages.tsx`**
+- **Tab 1: "المحادثات"** — نقل واجهة الشات من `/messages` إلى هنا (قائمة threads + نافذة محادثة)
+- **Tab 2: "رسائل الموقع"** — عرض `contact_messages` مع فلاتر (جديد/مقروء/مردود/مؤرشف)
+  - كل رسالة: Card يعرض الاسم، النوع، البريد، التاريخ
+  - أزرار: عرض، تعليم كمقروء، أرشفة، رد بالبريد (mailto)
+  - إذا sender_user_id موجود → زر "فتح محادثة"
+
+**صفحة تفاصيل رسالة: `src/pages/talents/TalentsContactMessageDetail.tsx`**
+- عرض الرسالة كاملة مع كل الأزرار
+
+**إضافة في TalentsSidebar:** رابط "الرسائل" مع أيقونة `MessageSquare` + badge عدد الجديد
+
+---
+
+### 5. تحديث الـ Routing (`App.tsx`)
+
+```
+/talents/messages          → TalentsMessages (Tab: محادثات + رسائل الموقع)
+/talents/messages/contact/:id → TalentsContactMessageDetail
 ```
 
-#### 7. تصدير PDF
-- استخدام `html2canvas` + `jspdf` الموجودين
-- اسم الملف: `kwader-{username}-cv.pdf`
-- جودة A4 عالية
+الإبقاء على `/messages` كصفحة عامة للشات (أو redirect إلى `/talents/messages`)
 
-#### 8. Footer Branding
-- سطر هادئ `text-[10px]` رمادي فاتح
-- "تم إنشاء هذه السيرة عبر منصة كوادر · www.kawader.sa"
+---
 
-#### 9. Empty States ذكية
-- أقسام فارغة لا تظهر (كما هو حالياً)
-- إذا كان المستخدم هو المالك: عرض رسالة "أضف خبرة لتقوية ملفك" + رابط للبوابة (تحسين مستقبلي)
+### 6. تحديث Navbar
+
+- أيقونة الرسائل الحالية تعرض مجموع: unread chat + new contact messages
+- عند الضغط → `/talents/messages`
+
+---
+
+### 7. Hooks جديدة
+
+- `useContactMessages()` — جلب رسائل الموقع للكادر الحالي
+- `useNewContactCount()` — عدد الرسائل الجديدة
+- `useSendContactMessage()` — إرسال رسالة من النموذج (بدون auth مطلوب)
+- `useUpdateContactStatus()` — تحديث حالة الرسالة
 
 ---
 
 ### الملفات المتأثرة
-| الملف | التغيير |
+
+| ملف | تغيير |
 |---|---|
-| `src/pages/PublicCV.tsx` | إعادة بناء كاملة |
-| `src/index.css` | إضافة print styles |
+| Migration SQL | إنشاء `contact_messages` + RLS |
+| `src/hooks/useContactMessages.ts` | جديد |
+| `src/components/talents/ContactFormModal.tsx` | جديد |
+| `src/pages/talents/TalentsMessages.tsx` | جديد |
+| `src/pages/talents/TalentsContactMessageDetail.tsx` | جديد |
+| `src/pages/PublicProfile.tsx` | تعديل أزرار التواصل |
+| `src/components/talents/TalentsSidebar.tsx` | إضافة رابط الرسائل |
+| `src/App.tsx` | إضافة routes |
+| `src/components/layout/Navbar.tsx` | تحديث badge العداد |
 
