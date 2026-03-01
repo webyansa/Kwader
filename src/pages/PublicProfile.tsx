@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,6 +30,8 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useGetOrCreateThread } from "@/hooks/useMessages";
 import { isProfileHidden, isProfileUnlisted, normalizeProfileVisibility } from "@/lib/publicProfile";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -46,7 +48,10 @@ const expLevelLabel: Record<string, string> = {
 
 const PublicProfile = () => {
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const getOrCreateThread = useGetOrCreateThread();
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -269,7 +274,26 @@ const PublicProfile = () => {
                     </div>
                   )}
 
-                  <Button className="w-full rounded-xl gap-2" variant={allowContact ? "default" : "outline"} disabled={!allowContact}>
+                  <Button
+                    className="w-full rounded-xl gap-2"
+                    variant={allowContact ? "default" : "outline"}
+                    disabled={!allowContact || getOrCreateThread.isPending}
+                    onClick={() => {
+                      if (!user) {
+                        navigate("/login");
+                        return;
+                      }
+                      if (!profile?.user_id) return;
+                      getOrCreateThread.mutate(profile.user_id, {
+                        onSuccess: (threadId) => {
+                          navigate(`/messages?thread=${threadId}`);
+                        },
+                        onError: () => {
+                          toast({ title: "حدث خطأ", description: "لم نتمكن من بدء المحادثة", variant: "destructive" });
+                        },
+                      });
+                    }}
+                  >
                     <Mail className="h-4 w-4" />{allowContact ? "راسلني عبر كوادر" : "المراسلة غير مفعلة"}
                   </Button>
                 </CardContent>
