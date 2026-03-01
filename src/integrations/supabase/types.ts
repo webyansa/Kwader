@@ -474,6 +474,71 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message_text: string
+          sender_id: string
+          thread_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message_text: string
+          sender_id: string
+          thread_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message_text?: string
+          sender_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messages_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages_threads: {
+        Row: {
+          created_at: string
+          id: string
+          is_archived: boolean
+          last_message_at: string
+          participant_one_id: string
+          participant_two_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          last_message_at?: string
+          participant_one_id: string
+          participant_two_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          last_message_at?: string
+          participant_one_id?: string
+          participant_two_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -895,6 +960,10 @@ export type Database = {
       generate_job_short_id: { Args: never; Returns: string }
       generate_username: {
         Args: { _full_name: string; _user_id: string }
+        Returns: string
+      }
+      get_or_create_thread: {
+        Args: { _other_user_id: string }
         Returns: string
       }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }

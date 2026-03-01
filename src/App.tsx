@@ -63,6 +63,7 @@ import TalentsSettings from "./pages/talents/TalentsSettings";
 import PublicProfile from "./pages/PublicProfile";
 import PublicCV from "./pages/PublicCV";
 import CvDownloadProxy from "./pages/CvDownloadProxy";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -194,6 +195,9 @@ const App = () => (
                 {/* Public profile + CV */}
                 <Route path="/talent/:username" element={<PublicProfile />} />
                 <Route path="/talent/:username/cv" element={<PublicCV />} />
+
+                {/* Messages */}
+                <Route path="/messages" element={<Messages />} />
 
                 {/* Secure CV download proxy */}
                 <Route path="/api/cv/download/:username" element={<CvDownloadProxy />} />

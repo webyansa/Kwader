@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isPlatformStaff, isOrganization, isJobSeeker } from "@/lib/roles";
+import { useUnreadCount } from "@/hooks/useMessages";
 import UserMenu from "./UserMenu";
 
 const publicLinks = [
@@ -19,6 +21,7 @@ const publicLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, roles, loading } = useAuth();
+  const { data: unreadCount = 0 } = useUnreadCount();
 
   const isLoggedIn = !!user;
   const staff = isPlatformStaff(roles);
@@ -71,6 +74,14 @@ const Navbar = () => {
                   <Link to="/talents/dashboard">لوحة الكوادر</Link>
                 </Button>
               )}
+              <Link to="/messages" className="relative p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors">
+                <MessageSquare className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -left-1 h-4 min-w-4 rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </Badge>
+                )}
+              </Link>
               <UserMenu />
             </>
           ) : !loading ? (
