@@ -60,6 +60,8 @@ import TalentsCVStudio from "./pages/talents/TalentsCVStudio";
 import TalentsApplications from "./pages/talents/TalentsApplications";
 import TalentApplicationDetails from "./pages/talents/TalentApplicationDetails";
 import TalentsSettings from "./pages/talents/TalentsSettings";
+import TalentsMessages from "./pages/talents/TalentsMessages";
+import TalentsContactMessageDetail from "./pages/talents/TalentsContactMessageDetail";
 import PublicProfile from "./pages/PublicProfile";
 import PublicCV from "./pages/PublicCV";
 import CvDownloadProxy from "./pages/CvDownloadProxy";
@@ -168,6 +170,8 @@ const App = () => (
                   <Route path="dashboard" element={<TalentsDashboard />} />
                   <Route path="profile" element={<TalentsProfile />} />
                   <Route path="cv" element={<TalentsCVStudio />} />
+                  <Route path="messages" element={<TalentsMessages />} />
+                  <Route path="messages/contact/:id" element={<TalentsContactMessageDetail />} />
                   <Route path="applications" element={<TalentsApplications />} />
                   <Route path="applications/:id" element={<TalentApplicationDetails />} />
                   <Route path="settings" element={<TalentsSettings />} />
@@ -186,6 +190,8 @@ const App = () => (
                   <Route path="dashboard" element={<TalentsDashboard />} />
                   <Route path="profile" element={<TalentsProfile />} />
                   <Route path="cv" element={<TalentsCVStudio />} />
+                  <Route path="messages" element={<TalentsMessages />} />
+                  <Route path="messages/contact/:id" element={<TalentsContactMessageDetail />} />
                   <Route path="applications" element={<TalentsApplications />} />
                   <Route path="applications/:id" element={<TalentApplicationDetails />} />
                   <Route path="settings" element={<TalentsSettings />} />
