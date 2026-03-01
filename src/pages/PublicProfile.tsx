@@ -51,7 +51,7 @@ const PublicProfile = () => {
   const [copied, setCopied] = useState(false);
 
   const normalizedUsername = (username || "").toLowerCase();
-  const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/@${normalizedUsername}` : `https://www.kawader.sa/@${normalizedUsername}`;
+  const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/talent/${normalizedUsername}` : `https://www.kawader.sa/talent/${normalizedUsername}`;
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["public-profile", normalizedUsername],
@@ -214,7 +214,7 @@ const PublicProfile = () => {
                 <div className="flex flex-wrap gap-2">
                   {allowCvView && (
                     <Button asChild className="rounded-xl gap-2">
-                      <Link to={`/@${normalizedUsername}/cv`}>
+                      <Link to={`/talent/${normalizedUsername}/cv`}>
                         <FileText className="h-4 w-4" />عرض السيرة الذاتية
                       </Link>
                     </Button>
@@ -430,7 +430,7 @@ const PublicProfile = () => {
               <div className="inline-block rounded-xl border bg-card p-3">
                 <QRCodeCanvas id="public-profile-qr" value={profileUrl} size={200} level="H" />
               </div>
-              <p className="text-xs text-muted-foreground">يفتح هذا الرمز صفحة /@{normalizedUsername}</p>
+              <p className="text-xs text-muted-foreground">يفتح هذا الرمز صفحة /talent/{normalizedUsername}</p>
 
               <Button className="w-full rounded-xl gap-2" onClick={downloadQr}>
                 <Download className="h-4 w-4" />تحميل QR كصورة

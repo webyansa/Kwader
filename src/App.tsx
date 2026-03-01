@@ -192,8 +192,6 @@ const App = () => (
                 </Route>
 
                 {/* Public profile + CV */}
-                <Route path="/@:username" element={<PublicProfile />} />
-                <Route path="/@:username/cv" element={<PublicCV />} />
                 <Route path="/talent/:username" element={<PublicProfile />} />
                 <Route path="/talent/:username/cv" element={<PublicCV />} />
 

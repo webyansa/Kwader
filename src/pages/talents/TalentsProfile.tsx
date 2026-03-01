@@ -196,7 +196,7 @@ const TalentsProfile = () => {
         <div className="flex items-center gap-2">
           {username && (
             <Button variant="outline" size="sm" asChild className="gap-1.5 rounded-xl">
-              <Link to={`/@${username}`} target="_blank"><Eye className="h-4 w-4" />معاينة</Link>
+              <Link to={`/talent/${username}`} target="_blank"><Eye className="h-4 w-4" />معاينة</Link>
             </Button>
           )}
           <Button variant="outline" size="sm" asChild className="gap-1.5 rounded-xl">
@@ -229,7 +229,7 @@ const TalentsProfile = () => {
           <div className="space-y-2">
             <Label className="flex items-center gap-1"><AtSign className="h-3.5 w-3.5" />اسم المستخدم (Username)</Label>
             <Input value={username} onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))} placeholder="your-username" dir="ltr" className="text-left" maxLength={30} />
-            <p className="text-xs text-muted-foreground">رابطك: /@{username || "..."}</p>
+            <p className="text-xs text-muted-foreground">رابطك: /talent/{username || "..."}</p>
           </div>
         </div>
         <div className="space-y-2">
