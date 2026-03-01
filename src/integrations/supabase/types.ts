@@ -217,6 +217,10 @@ export type Database = {
       }
       job_seeker_profiles: {
         Row: {
+          allow_contact_requests: boolean
+          allow_cv_download: boolean
+          allow_cv_public_view: boolean
+          available_for_work: boolean
           avatar_url: string | null
           certifications: string | null
           city: string | null
@@ -244,6 +248,10 @@ export type Database = {
           volunteering: Json | null
         }
         Insert: {
+          allow_contact_requests?: boolean
+          allow_cv_download?: boolean
+          allow_cv_public_view?: boolean
+          available_for_work?: boolean
           avatar_url?: string | null
           certifications?: string | null
           city?: string | null
@@ -271,6 +279,10 @@ export type Database = {
           volunteering?: Json | null
         }
         Update: {
+          allow_contact_requests?: boolean
+          allow_cv_download?: boolean
+          allow_cv_public_view?: boolean
+          available_for_work?: boolean
           avatar_url?: string | null
           certifications?: string | null
           city?: string | null
