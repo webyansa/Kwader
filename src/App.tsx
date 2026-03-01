@@ -61,6 +61,7 @@ import TalentsApplications from "./pages/talents/TalentsApplications";
 import TalentApplicationDetails from "./pages/talents/TalentApplicationDetails";
 import TalentsSettings from "./pages/talents/TalentsSettings";
 import PublicProfile from "./pages/PublicProfile";
+import PublicCV from "./pages/PublicCV";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -188,6 +189,7 @@ const App = () => (
 
                 {/* Public profile */}
                 <Route path="/@:username" element={<PublicProfile />} />
+                <Route path="/@:username/cv" element={<PublicCV />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
