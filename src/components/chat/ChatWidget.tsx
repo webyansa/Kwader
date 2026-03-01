@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageSquare, X, Minus, Send, Circle } from "lucide-react";
+import { MessageSquare, X, Minus, Send, Building2, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useChatWidget } from "@/contexts/ChatWidgetContext";
 import { useMessages, useSendMessage, useUnreadCount } from "@/hooks/useMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const ChatWidget = () => {
@@ -18,21 +20,18 @@ const ChatWidget = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll on new messages
   useEffect(() => {
     if (scrollRef.current && isOpen) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isOpen]);
 
-  // Focus input when opening
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
 
-  // Don't render for non-authenticated users
   if (!user) return null;
 
   const handleSend = () => {
@@ -43,17 +42,14 @@ const ChatWidget = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const showBubble = !isOpen && (isMinimized || threadId);
 
   return (
     <div className="fixed bottom-4 start-4 z-50 flex flex-col items-start gap-2" dir="rtl">
-      {/* Floating bubble when minimized */}
+      {/* Floating bubble */}
       <AnimatePresence>
         {showBubble && (
           <motion.button
@@ -84,20 +80,18 @@ const ChatWidget = () => {
             className="flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border bg-card shadow-xl"
             style={{ height: "420px" }}
           >
-            {/* Header */}
+            {/* Header with identity */}
             <div className="flex items-center gap-3 border-b bg-primary/5 px-4 py-3">
-              <div className="relative">
-                {target.avatarUrl ? (
-                  <img src={target.avatarUrl} alt="" className="h-10 w-10 rounded-full border object-cover" />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                    {(target.fullName || "؟").charAt(0)}
-                  </div>
-                )}
-                <Circle className="absolute -bottom-0.5 -end-0.5 h-3.5 w-3.5 fill-success text-success" />
-              </div>
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarImage src={target.avatarUrl || ""} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
+                  {(target.fullName || "؟").charAt(0)}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="truncate text-sm font-bold text-foreground">{target.fullName}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-bold text-foreground">{target.fullName}</p>
+                </div>
                 <p className="truncate text-xs text-muted-foreground">
                   {target.availableForWork ? "متاح للعمل" : "متصل الآن"}
                 </p>
@@ -129,20 +123,14 @@ const ChatWidget = () => {
                   const isMine = msg.sender_id === user.id;
                   return (
                     <div key={msg.id} className={cn("flex", isMine ? "justify-end" : "justify-start")}>
-                      <div
-                        className={cn(
-                          "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
-                          isMine
-                            ? "rounded-ee-md bg-primary text-primary-foreground"
-                            : "rounded-es-md bg-secondary text-foreground"
-                        )}
-                      >
+                      <div className={cn(
+                        "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
+                        isMine ? "rounded-ee-md bg-primary text-primary-foreground" : "rounded-es-md bg-secondary text-foreground"
+                      )}>
                         <p className="whitespace-pre-wrap break-words">{msg.message_text}</p>
                         <div className={cn("mt-1 flex items-center gap-1 text-[10px]", isMine ? "text-primary-foreground/60" : "text-muted-foreground")}>
                           <span>{new Date(msg.created_at).toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}</span>
-                          {isMine && (
-                            <span>{msg.is_read ? "✓✓" : "✓"}</span>
-                          )}
+                          {isMine && <span>{msg.is_read ? "✓✓" : "✓"}</span>}
                         </div>
                       </div>
                     </div>
@@ -151,7 +139,7 @@ const ChatWidget = () => {
               )}
             </div>
 
-            {/* Footer input */}
+            {/* Footer */}
             <div className="border-t bg-card p-3">
               <div className="flex items-end gap-2">
                 <textarea
@@ -164,12 +152,7 @@ const ChatWidget = () => {
                   className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   style={{ maxHeight: "80px" }}
                 />
-                <Button
-                  size="icon"
-                  className="h-9 w-9 shrink-0 rounded-xl"
-                  disabled={!text.trim() || sendMessage.isPending}
-                  onClick={handleSend}
-                >
+                <Button size="icon" className="h-9 w-9 shrink-0 rounded-xl" disabled={!text.trim() || sendMessage.isPending} onClick={handleSend}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
