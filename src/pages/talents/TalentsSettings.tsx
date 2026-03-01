@@ -116,7 +116,7 @@ const TalentsSettings = () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">يتحكم في ظهور صفحتك العامة /@username</p>
+              <p className="text-xs text-muted-foreground">يتحكم في ظهور صفحتك العامة /talent/username</p>
             </div>
 
             <Separator />
@@ -140,7 +140,7 @@ const TalentsSettings = () => {
                 <Label className="text-sm font-bold flex items-center gap-2">
                   <Eye className="h-4 w-4 text-primary" />السماح بعرض السيرة الذاتية
                 </Label>
-                <p className="text-xs text-muted-foreground">يسمح للزوار بفتح صفحة سيرتك /@username/cv</p>
+                <p className="text-xs text-muted-foreground">يسمح للزوار بفتح صفحة سيرتك /talent/username/cv</p>
               </div>
               <Switch checked={allowCvView} onCheckedChange={setAllowCvView} />
             </div>

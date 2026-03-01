@@ -33,7 +33,7 @@ const PublicCV = () => {
   const { toast } = useToast();
 
   const normalizedUsername = (username || "").toLowerCase();
-  const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/@${normalizedUsername}` : `https://www.kawader.sa/@${normalizedUsername}`;
+  const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/talent/${normalizedUsername}` : `https://www.kawader.sa/talent/${normalizedUsername}`;
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["public-cv", normalizedUsername],
@@ -104,7 +104,7 @@ const PublicCV = () => {
             <p className="text-muted-foreground">{unavailableDescription}</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Button asChild className="rounded-xl">
-                <Link to={`/@${normalizedUsername}`}>العودة للملف المهني</Link>
+                <Link to={`/talent/${normalizedUsername}`}>العودة للملف المهني</Link>
               </Button>
               <Button variant="outline" asChild className="rounded-xl">
                 <Link to="/talents">تصفح كوادر القطاع</Link>
@@ -132,7 +132,7 @@ const PublicCV = () => {
         <div className="container max-w-5xl">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <Button asChild variant="ghost" className="rounded-xl gap-2">
-              <Link to={`/@${normalizedUsername}`}>
+              <Link to={`/talent/${normalizedUsername}`}>
                 <ArrowRight className="h-4 w-4" />رجوع للملف
               </Link>
             </Button>

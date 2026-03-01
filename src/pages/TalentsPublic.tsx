@@ -96,7 +96,7 @@ const TalentsPublic = () => {
   }, []);
 
   const profileBaseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const profileUrl = (username: string) => `${profileBaseUrl}/@${username}`;
+  const profileUrl = (username: string) => `${profileBaseUrl}/talent/${username}`;
 
   const availableFields = useMemo(() => {
     const set = new Set<string>();
@@ -344,7 +344,7 @@ const TalentsPublic = () => {
                         <div className="flex items-center gap-2 border-t pt-3">
                           {talent.username ? (
                             <Button asChild size="sm" className="h-9 flex-1 rounded-xl gap-1.5">
-                              <Link to={`/@${talent.username}`}>
+                              <Link to={`/talent/${talent.username}`}>
                                 <Eye className="h-3.5 w-3.5" />عرض التفاصيل
                               </Link>
                             </Button>
@@ -356,7 +356,7 @@ const TalentsPublic = () => {
 
                           {talent.username && talent.allow_cv_public_view && (
                             <Button asChild size="sm" variant="outline" className="h-9 rounded-xl gap-1.5">
-                              <Link to={`/@${talent.username}/cv`}>
+                              <Link to={`/talent/${talent.username}/cv`}>
                                 <FileText className="h-3.5 w-3.5" />السيرة
                               </Link>
                             </Button>
@@ -406,7 +406,7 @@ const TalentsPublic = () => {
               <div className="inline-block rounded-xl border bg-card p-3">
                 <QRCodeCanvas id={`qr-${qrUsername}`} value={profileUrl(qrUsername)} size={200} level="H" />
               </div>
-              <p className="text-xs text-muted-foreground">امسح الكود لفتح صفحة /@{qrUsername}</p>
+              <p className="text-xs text-muted-foreground">امسح الكود لفتح صفحة /talent/{qrUsername}</p>
 
               <Button className="w-full rounded-xl gap-2" onClick={handleDownloadQr}>
                 <Download className="h-4 w-4" />تحميل QR كصورة PNG

@@ -91,7 +91,7 @@ const TalentsCVStudio = () => {
   });
 
   const profileUrl = profile && (profile as any).username
-    ? `${window.location.origin}/@${(profile as any).username}`
+    ? `${window.location.origin}/talent/${(profile as any).username}`
     : "";
 
   const handleAI = async (action: typeof AI_ACTIONS[0]) => {

@@ -9,7 +9,7 @@ const CvDownloadProxy = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
 
-  const fallbackProfileUrl = useMemo(() => (username ? `/@${username}` : "/talents"), [username]);
+  const fallbackProfileUrl = useMemo(() => (username ? `/talent/${username}` : "/talents"), [username]);
 
   useEffect(() => {
     const run = async () => {
