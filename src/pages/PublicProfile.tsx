@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import ContactFormModal from "@/components/talents/ContactFormModal";
 import LoginPromptModal from "@/components/talents/LoginPromptModal";
+import { useChatWidget } from "@/contexts/ChatWidgetContext";
 import { QRCodeCanvas } from "qrcode.react";
 import { differenceInDays } from "date-fns";
 import {
@@ -54,10 +55,12 @@ const PublicProfile = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const getOrCreateThread = useGetOrCreateThread();
+  const { openChat, toggleWidget, isOpen: widgetOpen, threadId: activeThreadId, closeWidget } = useChatWidget();
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [chatThreadId, setChatThreadId] = useState<string | null>(null);
 
   const normalizedUsername = (username || "").toLowerCase();
   const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/talent/${normalizedUsername}` : `https://www.kawader.sa/talent/${normalizedUsername}`;
@@ -76,6 +79,50 @@ const PublicProfile = () => {
     },
     enabled: Boolean(normalizedUsername),
   });
+
+  // CTA state
+  const isChatActive = !!(chatThreadId && widgetOpen && activeThreadId === chatThreadId);
+  const ctaLabel = isChatActive ? "إغلاق المحادثة" : chatThreadId ? "تحدّث معي الآن" : "مراسلة عبر كوادر";
+
+  const handleChatCTA = useCallback(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    if (!profile?.user_id) return;
+
+    if (isChatActive) {
+      closeWidget();
+      return;
+    }
+
+    if (chatThreadId) {
+      openChat(chatThreadId, {
+        userId: profile.user_id,
+        fullName: profile.full_name || "كادر",
+        avatarUrl: profile.avatar_url,
+        headline: profile.headline || undefined,
+        availableForWork: profile.available_for_work || false,
+      });
+      return;
+    }
+
+    getOrCreateThread.mutate(profile.user_id, {
+      onSuccess: (tid) => {
+        setChatThreadId(tid);
+        openChat(tid, {
+          userId: profile.user_id!,
+          fullName: profile.full_name || "كادر",
+          avatarUrl: profile.avatar_url,
+          headline: profile.headline || undefined,
+          availableForWork: profile.available_for_work || false,
+        });
+      },
+      onError: () => {
+        toast({ title: "حدث خطأ", description: "لم نتمكن من بدء المحادثة", variant: "destructive" });
+      },
+    });
+  }, [user, profile, chatThreadId, isChatActive, getOrCreateThread, openChat, closeWidget, toast]);
 
   const visibility = normalizeProfileVisibility(profile?.privacy);
   const noIndex = isProfileUnlisted(profile?.privacy);
@@ -278,35 +325,15 @@ const PublicProfile = () => {
                     </div>
                   )}
 
-                  {/* Chat button - only for logged in users */}
-                  {user && allowContact && (
+                  {/* Chat CTA - unified button */}
+                  {allowContact && (
                     <Button
                       className="w-full rounded-xl gap-2"
+                      variant={isChatActive ? "outline" : "default"}
                       disabled={getOrCreateThread.isPending}
-                      onClick={() => {
-                        if (!profile?.user_id) return;
-                        getOrCreateThread.mutate(profile.user_id, {
-                          onSuccess: (threadId) => {
-                            navigate(`/talents/messages?tab=chats`);
-                          },
-                          onError: () => {
-                            toast({ title: "حدث خطأ", description: "لم نتمكن من بدء المحادثة", variant: "destructive" });
-                          },
-                        });
-                      }}
+                      onClick={handleChatCTA}
                     >
-                      <Mail className="h-4 w-4" />مراسلة عبر كوادر
-                    </Button>
-                  )}
-
-                  {/* Chat button for non-logged in - shows login prompt */}
-                  {!user && allowContact && (
-                    <Button
-                      className="w-full rounded-xl gap-2"
-                      variant="outline"
-                      onClick={() => setShowLoginPrompt(true)}
-                    >
-                      <Mail className="h-4 w-4" />مراسلة عبر كوادر
+                      <Mail className="h-4 w-4" />{ctaLabel}
                     </Button>
                   )}
 
@@ -499,7 +526,7 @@ const PublicProfile = () => {
       )}
 
       {/* Login Prompt Modal */}
-      <LoginPromptModal open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
+      <LoginPromptModal open={showLoginPrompt} onOpenChange={setShowLoginPrompt} onOpenContactForm={() => setShowContactForm(true)} />
 
       <Footer />
     </div>

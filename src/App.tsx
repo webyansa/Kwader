@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { HelmetProvider } from "react-helmet-async";
+import { ChatWidgetProvider } from "@/contexts/ChatWidgetContext";
+import ChatWidget from "@/components/chat/ChatWidget";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import SectorJobs from "./pages/SectorJobs";
@@ -79,6 +81,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <ChatWidgetProvider>
+              <ChatWidget />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/jobs" element={<Jobs />} />
@@ -210,6 +214,7 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </ChatWidgetProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
