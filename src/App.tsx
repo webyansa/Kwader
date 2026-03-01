@@ -62,6 +62,7 @@ import TalentApplicationDetails from "./pages/talents/TalentApplicationDetails";
 import TalentsSettings from "./pages/talents/TalentsSettings";
 import PublicProfile from "./pages/PublicProfile";
 import PublicCV from "./pages/PublicCV";
+import CvDownloadProxy from "./pages/CvDownloadProxy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/ngos" element={<NGOsDirectory />} />
                 <Route path="/ngos/:slug" element={<NGOProfile />} />
+                <Route path="/talents" element={<TalentsPublic />} />
                 <Route path="/talents-public" element={<TalentsPublic />} />
                 <Route path="/portal-landing" element={<PortalLanding />} />
                 <Route path="/talents-portal" element={<TalentsPortalLanding />} />
@@ -168,6 +170,7 @@ const App = () => (
                   <Route path="applications" element={<TalentsApplications />} />
                   <Route path="applications/:id" element={<TalentApplicationDetails />} />
                   <Route path="settings" element={<TalentsSettings />} />
+                  <Route path="settings/privacy" element={<TalentsSettings />} />
                 </Route>
 
                 {/* Alias path requested by product */}
@@ -185,11 +188,17 @@ const App = () => (
                   <Route path="applications" element={<TalentsApplications />} />
                   <Route path="applications/:id" element={<TalentApplicationDetails />} />
                   <Route path="settings" element={<TalentsSettings />} />
+                  <Route path="settings/privacy" element={<TalentsSettings />} />
                 </Route>
 
-                {/* Public profile */}
+                {/* Public profile + CV */}
                 <Route path="/@:username" element={<PublicProfile />} />
                 <Route path="/@:username/cv" element={<PublicCV />} />
+                <Route path="/talent/:username" element={<PublicProfile />} />
+                <Route path="/talent/:username/cv" element={<PublicCV />} />
+
+                {/* Secure CV download proxy */}
+                <Route path="/api/cv/download/:username" element={<CvDownloadProxy />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

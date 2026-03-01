@@ -1,79 +1,78 @@
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Helmet } from "react-helmet-async";
+import { QRCodeCanvas } from "qrcode.react";
+import {
+  Download,
+  Printer,
+  Share2,
+  ArrowRight,
+  Shield,
+  Briefcase,
+  GraduationCap,
+  Award,
+  Heart,
+  Linkedin,
+  Globe,
+  User,
+  FolderOpen,
+  MapPin,
+} from "lucide-react";
+
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Download, Printer, Share2, ArrowRight, Shield, FileText,
-  MapPin, Briefcase, GraduationCap, Award, Heart, Linkedin, Globe,
-  User, FolderOpen,
-} from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { useRef, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { isProfileHidden, isProfileUnlisted } from "@/lib/publicProfile";
 
 const PublicCV = () => {
   const { username } = useParams<{ username: string }>();
-  const [searchParams] = useSearchParams();
-  const cvRef = useRef<HTMLDivElement>(null);
-  const [exporting, setExporting] = useState(false);
   const { toast } = useToast();
 
-  const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/@${username}` : "";
+  const normalizedUsername = (username || "").toLowerCase();
+  const profileUrl = typeof window !== "undefined" ? `${window.location.origin}/@${normalizedUsername}` : `https://www.kawader.sa/@${normalizedUsername}`;
 
   const { data: profile, isLoading } = useQuery({
-    queryKey: ["public-cv", username],
+    queryKey: ["public-cv", normalizedUsername],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("job_seeker_profiles")
         .select("*")
-        .eq("username", username!)
+        .eq("username", normalizedUsername)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!username,
+    enabled: Boolean(normalizedUsername),
   });
 
   const allowCvView = profile?.allow_cv_public_view !== false;
   const allowCvDownload = profile?.allow_cv_download === true;
+  const hiddenProfile = !profile || isProfileHidden(profile.privacy);
+  const noIndex = isProfileUnlisted(profile?.privacy);
 
-  useEffect(() => {
-    if (searchParams.get("download") === "1" && allowCvDownload && profile) {
-      handleExportPDF();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile, allowCvDownload]);
-
-  const handleExportPDF = async () => {
-    if (!cvRef.current || !allowCvDownload) return;
-    setExporting(true);
-    try {
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).default;
-      const canvas = await html2canvas(cvRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const width = pdf.internal.pageSize.getWidth();
-      const height = (canvas.height * width) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, width, height);
-      pdf.save(`${profile?.full_name || "cv"}-kawader.pdf`);
-      toast({ title: "تم تنزيل السيرة الذاتية ✅" });
-    } catch (e: any) {
-      toast({ title: "خطأ في التنزيل", description: e.message, variant: "destructive" });
-    } finally {
-      setExporting(false);
-    }
-  };
+  const experiences = Array.isArray(profile?.experiences) ? (profile.experiences as any[]) : [];
+  const projects = Array.isArray(profile?.projects) ? (profile.projects as any[]) : [];
+  const volunteering = Array.isArray(profile?.volunteering) ? (profile.volunteering as any[]) : [];
+  const skills = Array.isArray(profile?.skills) ? (profile.skills as string[]) : [];
+  const initials = (profile?.full_name || "؟").charAt(0);
 
   const handlePrint = () => window.print();
+
   const handleShare = () => {
     navigator.clipboard.writeText(`${profileUrl}/cv`);
     toast({ title: "تم نسخ رابط السيرة ✅" });
   };
+
+  const unavailable = hiddenProfile || !allowCvView;
+
+  const unavailableTitle = hiddenProfile ? "الملف غير متاح" : "السيرة غير متاحة للعرض";
+  const unavailableDescription = hiddenProfile
+    ? "قد يكون الرابط غير صحيح أو تم إخفاء الملف."
+    : "صاحب الملف عطّل عرض السيرة الذاتية للعامة.";
 
   if (isLoading) {
     return (
@@ -87,20 +86,30 @@ const PublicCV = () => {
     );
   }
 
-  if (!profile || profile.privacy === "hidden" || !allowCvView) {
+  if (unavailable) {
     return (
       <div className="flex min-h-screen flex-col" dir="rtl">
+        <Helmet>
+          <title>{unavailableTitle} | كوادر</title>
+          <meta name="description" content={unavailableDescription} />
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
         <Navbar />
         <main className="flex flex-1 items-center justify-center py-20">
-          <div className="text-center space-y-4">
+          <div className="space-y-4 text-center">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <Shield className="h-10 w-10 text-muted-foreground/50" />
+              <Shield className="h-10 w-10 text-muted-foreground/60" />
             </div>
-            <h1 className="text-xl font-bold text-foreground">السيرة الذاتية غير متاحة للعرض</h1>
-            <p className="text-muted-foreground">صاحب الملف لم يسمح بعرض السيرة الذاتية أو الملف مخفي.</p>
-            <Button asChild variant="outline" className="rounded-xl gap-2">
-              <Link to={`/@${username}`}><ArrowRight className="h-4 w-4" />العودة للملف المهني</Link>
-            </Button>
+            <h1 className="text-xl font-bold text-foreground">{unavailableTitle}</h1>
+            <p className="text-muted-foreground">{unavailableDescription}</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button asChild className="rounded-xl">
+                <Link to={`/@${normalizedUsername}`}>العودة للملف المهني</Link>
+              </Button>
+              <Button variant="outline" asChild className="rounded-xl">
+                <Link to="/talents">تصفح كوادر القطاع</Link>
+              </Button>
+            </div>
           </div>
         </main>
         <Footer />
@@ -108,193 +117,176 @@ const PublicCV = () => {
     );
   }
 
-  const experiences = (profile.experiences as any[]) || [];
-  const projects = (profile.projects as any[]) || [];
-  const volunteering = (profile.volunteering as any[]) || [];
-  const skills = profile.skills || [];
-  const initials = (profile.full_name || "؟").charAt(0);
-
   return (
-    <div className="flex min-h-screen flex-col bg-muted/50" dir="rtl">
+    <div className="flex min-h-screen flex-col bg-muted/40" dir="rtl">
       <Helmet>
-        <title>{profile.full_name} - السيرة الذاتية | كوادر</title>
-        <meta name="description" content={`السيرة الذاتية لـ ${profile.full_name} على منصة كوادر`} />
+        <title>{profile.full_name || normalizedUsername} - السيرة الذاتية | كوادر</title>
+        <meta name="description" content={`السيرة الذاتية الاحترافية لـ ${profile.full_name || normalizedUsername} على منصة كوادر`} />
         <link rel="canonical" href={`${profileUrl}/cv`} />
+        <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
       </Helmet>
+
       <Navbar />
 
       <main className="flex-1 py-8">
-        <div className="container max-w-4xl">
-          {/* Action Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 print:hidden">
+        <div className="container max-w-5xl">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <Button asChild variant="ghost" className="rounded-xl gap-2">
-              <Link to={`/@${username}`}><ArrowRight className="h-4 w-4" />العودة للملف المهني</Link>
+              <Link to={`/@${normalizedUsername}`}>
+                <ArrowRight className="h-4 w-4" />رجوع للملف
+              </Link>
             </Button>
-            <div className="flex items-center gap-2">
+
+            <div className="flex flex-wrap items-center gap-2">
               {allowCvDownload && (
-                <Button className="rounded-xl gap-2 bg-primary hover:bg-primary/90" onClick={handleExportPDF} disabled={exporting}>
-                  <Download className="h-4 w-4" />{exporting ? "جارٍ..." : "تنزيل PDF"}
+                <Button asChild className="rounded-xl gap-2">
+                  <Link to={`/api/cv/download/${normalizedUsername}`}>
+                    <Download className="h-4 w-4" />تحميل PDF
+                  </Link>
                 </Button>
               )}
-              <Button variant="outline" className="rounded-xl gap-2" onClick={handlePrint}>
-                <Printer className="h-4 w-4" />طباعة
-              </Button>
               <Button variant="outline" className="rounded-xl gap-2" onClick={handleShare}>
                 <Share2 className="h-4 w-4" />مشاركة
+              </Button>
+              <Button variant="outline" className="rounded-xl gap-2" onClick={handlePrint}>
+                <Printer className="h-4 w-4" />طباعة
               </Button>
             </div>
           </div>
 
-          {/* CV Document */}
-          <Card className="rounded-2xl overflow-hidden shadow-premium border-0">
-            <div ref={cvRef} style={{ width: "100%", minHeight: 800, fontFamily: "'IBM Plex Sans Arabic', sans-serif", backgroundColor: '#fff' }}>
-              {/* CV Header */}
-              <div className="p-8 pb-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(231 50% 30%) 0%, hsl(231 50% 40%) 100%)' }}>
-                <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full opacity-10 bg-white" />
-                <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-10 bg-white" />
-
-                <div className="relative flex items-center gap-6" dir="rtl">
-                  <div className="shrink-0">
+          <Card className="overflow-hidden rounded-2xl border shadow-premium">
+            <div className="mx-auto w-full max-w-[900px] bg-card" style={{ minHeight: "1120px" }}>
+              <header className="border-b bg-gradient-to-bl from-primary/10 via-background to-highlight/10 p-7">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
                     {profile.avatar_url ? (
-                      <div className="rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, hsl(249 100% 69%), hsl(195 100% 50%))' }}>
-                        <img src={profile.avatar_url} alt="" className="w-[100px] h-[100px] rounded-full object-cover border-4 border-white" />
-                      </div>
+                      <img src={profile.avatar_url} alt={profile.full_name || "صورة الكادر"} className="h-20 w-20 rounded-full border object-cover" loading="lazy" />
                     ) : (
-                      <div className="w-[100px] h-[100px] rounded-full flex items-center justify-center text-white text-4xl font-bold border-4 border-white/30" style={{ background: 'linear-gradient(135deg, hsl(249 100% 69%), hsl(195 100% 50%))' }}>
-                        {initials}
-                      </div>
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary text-3xl font-bold text-primary-foreground">{initials}</div>
                     )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-2xl font-bold text-white leading-tight">{profile.full_name || "الاسم"}</h1>
-                    {profile.headline && <p className="text-sm mt-1.5 text-white/80 font-medium">{profile.headline}</p>}
-                    <div className="flex flex-wrap gap-4 mt-3">
-                      {profile.city && <span className="flex items-center gap-1.5 text-xs text-white/70"><MapPin className="h-3.5 w-3.5" />{profile.city}</span>}
-                      {profile.linkedin_url && <span className="flex items-center gap-1.5 text-xs text-white/70"><Linkedin className="h-3.5 w-3.5" />LinkedIn</span>}
-                      {profile.portfolio_url && <span className="flex items-center gap-1.5 text-xs text-white/70"><Globe className="h-3.5 w-3.5" />Portfolio</span>}
+                    <div className="space-y-1">
+                      <h1 className="text-2xl font-black text-foreground">{profile.full_name || "الاسم"}</h1>
+                      {profile.headline && <p className="font-medium text-muted-foreground">{profile.headline}</p>}
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        {profile.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{profile.city}</span>}
+                        {profile.linkedin_url && <span className="inline-flex items-center gap-1"><Linkedin className="h-3.5 w-3.5" />LinkedIn</span>}
+                        {profile.portfolio_url && <span className="inline-flex items-center gap-1"><Globe className="h-3.5 w-3.5" />Portfolio</span>}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="shrink-0 bg-white rounded-xl p-2 shadow-sm print:hidden">
-                    <QRCodeSVG value={profileUrl} size={60} level="M" fgColor="hsl(231, 50%, 30%)" />
+                  <div className="rounded-xl border bg-card p-2">
+                    <QRCodeCanvas value={profileUrl} size={72} level="M" />
                   </div>
                 </div>
-              </div>
+              </header>
 
-              {/* CV Body - Two Column */}
-              <div className="flex gap-0" dir="rtl" style={{ minHeight: 500 }}>
-                {/* Right Column (main) */}
-                <div className="flex-1 p-6 space-y-5">
-                  {profile.summary && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <User className="h-4 w-4" />النبذة المهنية
-                      </h2>
-                      <p className="text-xs text-gray-700 leading-[1.8] whitespace-pre-line">{profile.summary}</p>
-                    </div>
-                  )}
-
-                  {experiences.length > 0 && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <Briefcase className="h-4 w-4" />الخبرات العملية
-                      </h2>
-                      <div className="space-y-3">
-                        {experiences.map((exp: any, i: number) => (
-                          <div key={i} className="pr-3 border-r-2 rounded-sm" style={{ borderColor: 'hsl(231 50% 30% / 0.2)' }}>
-                            <div className="flex justify-between items-baseline">
-                              <h3 className="text-xs font-bold text-gray-800">{exp.title}</h3>
-                              <span className="text-[10px] text-gray-400 whitespace-nowrap">{exp.period}</span>
-                            </div>
-                            {exp.company && <p className="text-[11px] font-medium" style={{ color: 'hsl(231 50% 30%)' }}>{exp.company}</p>}
-                            {exp.description && <p className="text-xs text-gray-600 mt-1 leading-relaxed">{exp.description}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {projects.length > 0 && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <FolderOpen className="h-4 w-4" />المشاريع والإنجازات
-                      </h2>
-                      <div className="space-y-2">
-                        {projects.map((p: any, i: number) => (
-                          <div key={i} className="pr-3 border-r-2 rounded-sm" style={{ borderColor: 'hsl(231 50% 30% / 0.2)' }}>
-                            <h3 className="text-xs font-bold text-gray-800">{p.title}</h3>
-                            {p.description && <p className="text-xs text-gray-600 mt-0.5">{p.description}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {volunteering.length > 0 && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <Heart className="h-4 w-4" />التطوع
-                      </h2>
-                      <div className="space-y-2">
-                        {volunteering.map((v: any, i: number) => (
-                          <div key={i} className="pr-3 border-r-2 rounded-sm" style={{ borderColor: 'hsl(231 50% 30% / 0.2)' }}>
-                            <h3 className="text-xs font-bold text-gray-800">{v.role}</h3>
-                            <p className="text-[11px] text-gray-500">{v.organization} {v.period && `· ${v.period}`}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Left Column (sidebar) */}
-                <div className="w-[220px] shrink-0 p-5 space-y-5 bg-muted/50 border-r">
+              <div className="grid gap-0 md:grid-cols-[270px_1fr]">
+                <aside className="space-y-6 border-l bg-secondary/30 p-5">
                   {skills.length > 0 && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <Award className="h-4 w-4" />المهارات
+                    <section>
+                      <h2 className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground">
+                        <Award className="h-4 w-4 text-primary" />المهارات
                       </h2>
                       <div className="flex flex-wrap gap-1.5">
-                        {skills.map((s: string, i: number) => (
-                          <span key={i} className="rounded-full px-2.5 py-1 text-[11px] font-medium bg-highlight/10 text-highlight">
-                            {s}
-                          </span>
+                        {skills.map((skill: string, i: number) => (
+                          <span key={`${skill}-cv-${i}`} className="rounded-full bg-highlight/10 px-2.5 py-1 text-[11px] font-medium text-foreground">{skill}</span>
                         ))}
                       </div>
-                    </div>
+                    </section>
                   )}
 
                   {profile.education && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <GraduationCap className="h-4 w-4" />التعليم
+                    <section>
+                      <h2 className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground">
+                        <GraduationCap className="h-4 w-4 text-primary" />التعليم
                       </h2>
-                      <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{profile.education}</p>
-                    </div>
+                      <p className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{profile.education}</p>
+                    </section>
                   )}
 
                   {profile.certifications && (
-                    <div>
-                      <h2 className="text-sm font-bold mb-2 pb-1.5 border-b-2 flex items-center gap-2" style={{ color: 'hsl(231 50% 30%)', borderColor: 'hsl(231 50% 30%)' }}>
-                        <Award className="h-4 w-4" />الشهادات
+                    <section>
+                      <h2 className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground">
+                        <Award className="h-4 w-4 text-primary" />الشهادات
                       </h2>
-                      <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{profile.certifications}</p>
-                    </div>
+                      <p className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{profile.certifications}</p>
+                    </section>
+                  )}
+                </aside>
+
+                <div className="space-y-6 p-6">
+                  {profile.summary && (
+                    <section>
+                      <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-foreground">
+                        <User className="h-4 w-4 text-primary" />النبذة المهنية
+                      </h2>
+                      <p className="whitespace-pre-line text-sm leading-[1.9] text-muted-foreground">{profile.summary}</p>
+                    </section>
+                  )}
+
+                  {experiences.length > 0 && (
+                    <section>
+                      <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
+                        <Briefcase className="h-4 w-4 text-primary" />الخبرات
+                      </h2>
+                      <div className="space-y-3">
+                        {experiences.map((exp: any, i: number) => (
+                          <div key={i} className="space-y-1 border-r-2 border-primary/20 pr-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <h3 className="text-sm font-bold text-foreground">{exp.title || "خبرة"}</h3>
+                              {exp.period && <span className="text-[11px] text-muted-foreground">{exp.period}</span>}
+                            </div>
+                            {exp.company && <p className="text-xs font-medium text-primary">{exp.company}</p>}
+                            {exp.description && <p className="text-xs leading-relaxed text-muted-foreground">{exp.description}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {projects.length > 0 && (
+                    <section>
+                      <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
+                        <FolderOpen className="h-4 w-4 text-primary" />المشاريع والإنجازات
+                      </h2>
+                      <div className="space-y-2">
+                        {projects.map((project: any, i: number) => (
+                          <div key={i} className="space-y-1 border-r-2 border-primary/20 pr-4">
+                            <h3 className="text-sm font-bold text-foreground">{project.title || "مشروع"}</h3>
+                            {project.description && <p className="text-xs leading-relaxed text-muted-foreground">{project.description}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {volunteering.length > 0 && (
+                    <section>
+                      <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
+                        <Heart className="h-4 w-4 text-primary" />التطوع
+                      </h2>
+                      <div className="space-y-2">
+                        {volunteering.map((item: any, i: number) => (
+                          <div key={i} className="space-y-1 border-r-2 border-accent/30 pr-4">
+                            <h3 className="text-sm font-bold text-foreground">{item.role || "مشاركة تطوعية"}</h3>
+                            <p className="text-xs text-muted-foreground">{item.organization || ""} {item.period ? `· ${item.period}` : ""}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
                   )}
                 </div>
               </div>
 
-              {/* CV Footer */}
-              <div className="px-6 py-3 text-center border-t bg-muted/30">
-                <p className="text-[10px] text-muted-foreground font-medium">
-                  أُصدرت هذه السيرة من منصة كوادر &nbsp;·&nbsp; www.kawader.sa
-                </p>
-              </div>
+              <footer className="border-t bg-secondary/30 px-6 py-3 text-center">
+                <p className="text-[11px] text-muted-foreground">أُصدرت هذه السيرة من منصة كوادر · www.kawader.sa</p>
+              </footer>
             </div>
           </Card>
         </div>
       </main>
+
       <Footer />
     </div>
   );

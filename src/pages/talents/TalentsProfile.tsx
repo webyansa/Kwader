@@ -101,13 +101,37 @@ const TalentsProfile = () => {
 
   const handleSave = async () => {
     if (!user) return;
+
+    const normalizedUsername = username.trim().toLowerCase();
+    if (!normalizedUsername) {
+      toast({ title: "اسم المستخدم مطلوب", description: "أدخل اسم مستخدم لتفعيل رابط ملفك العام.", variant: "destructive" });
+      return;
+    }
+
+    if (!/^[a-z0-9_]{3,30}$/.test(normalizedUsername)) {
+      toast({ title: "اسم مستخدم غير صالح", description: "استخدم أحرف إنجليزية وأرقام و underscore فقط (3-30).", variant: "destructive" });
+      return;
+    }
+
+    const { data: existing } = await supabase
+      .from("job_seeker_profiles")
+      .select("user_id")
+      .eq("username", normalizedUsername)
+      .neq("user_id", user.id)
+      .maybeSingle();
+
+    if (existing) {
+      toast({ title: "اسم المستخدم محجوز", description: "اختر اسم مستخدم آخر.", variant: "destructive" });
+      return;
+    }
+
     setSaving(true);
     const skillsArr = skills.split(",").map(s => s.trim()).filter(Boolean);
     const { error } = await supabase
       .from("job_seeker_profiles")
       .update({
         full_name: fullName || null,
-        username: username || null,
+        username: normalizedUsername,
         headline: headline || null,
         city: city || null,
         experience_level: experienceLevel || null,
@@ -129,6 +153,7 @@ const TalentsProfile = () => {
     if (error) {
       toast({ title: "خطأ في الحفظ", description: error.message, variant: "destructive" });
     } else {
+      setUsername(normalizedUsername);
       toast({ title: "تم حفظ ملفك بنجاح ✅" });
     }
   };

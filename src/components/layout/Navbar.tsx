@@ -11,7 +11,7 @@ const publicLinks = [
   { label: "وظائف القطاع", href: "/sector-jobs" },
   { label: "عن المنصة", href: "/about" },
   { label: "دليل الجمعيات", href: "/ngos" },
-  { label: "كوادر القطاع", href: "/talents-public" },
+  { label: "كوادر القطاع", href: "/talents" },
   { label: "باقات الأسعار", href: "/pricing" },
   { label: "اتصل بنا", href: "/contact" },
 ];

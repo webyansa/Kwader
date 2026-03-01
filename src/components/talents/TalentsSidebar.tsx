@@ -13,7 +13,7 @@ const mainItems = [
   { title: "الملف المهني", url: "/talents/profile", icon: User },
   { title: "استوديو CV", url: "/talents/cv", icon: Palette },
   { title: "طلباتي", url: "/talents/applications", icon: FileText },
-  { title: "الإعدادات", url: "/talents/settings", icon: Settings },
+  { title: "الإعدادات", url: "/talents/settings/privacy", icon: Settings },
 ];
 
 const TalentsSidebar = () => {
