@@ -48,6 +48,10 @@ import PortalJobs from "./pages/portal/PortalJobs";
 import PortalNewJob from "./pages/portal/PortalNewJob";
 import PortalApplications from "./pages/portal/PortalApplications";
 import PortalTeam from "./pages/portal/PortalTeam";
+import PortalHRDashboard from "./pages/portal/PortalHRDashboard";
+import PortalEmployeeList from "./pages/portal/PortalEmployeeList";
+import PortalAddEmployee from "./pages/portal/PortalAddEmployee";
+import PortalEmployeeProfile from "./pages/portal/PortalEmployeeProfile";
 import PortalBilling from "./pages/portal/PortalBilling";
 import PortalSettings from "./pages/portal/PortalSettings";
 import PortalProfile from "./pages/portal/PortalProfile";
@@ -152,6 +156,10 @@ const App = () => (
                   <Route path="jobs/:id/edit" element={<PortalNewJob />} />
                   <Route path="applications" element={<PortalApplications />} />
                   <Route path="applications/:id" element={<PortalApplicationDetails />} />
+                  <Route path="hr" element={<PortalHRDashboard />} />
+                  <Route path="hr/employees" element={<PortalEmployeeList />} />
+                  <Route path="hr/employees/new" element={<PortalAddEmployee />} />
+                  <Route path="hr/employees/:employeeId" element={<PortalEmployeeProfile />} />
                   <Route path="team" element={<PortalTeam />} />
                   <Route path="billing" element={<PortalBilling />} />
                   <Route path="settings" element={<PortalSettings />} />
