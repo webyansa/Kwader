@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
+import AuthAccessSkeleton from "@/components/auth/AuthAccessSkeleton";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -14,14 +15,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="w-full max-w-sm rounded-2xl border border-border bg-card/80 p-6 text-center shadow-sm backdrop-blur-sm">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="mt-4 text-sm text-muted-foreground">جارٍ التحقق من صلاحيات الوصول...</p>
-        </div>
-      </div>
-    );
+    return <AuthAccessSkeleton message="جارٍ تجهيز البوابة والتحقق من الصلاحيات..." />;
   }
 
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
