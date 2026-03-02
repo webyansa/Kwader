@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  const requestedPath = (() => {
+    const state = location.state as { from?: string } | null;
+    const from = state?.from;
+    if (!from || !from.startsWith("/") || from.startsWith("//")) return null;
+    return from;
+  })();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +62,11 @@ const Login = () => {
     const userRoles = (rolesData?.map((r) => r.role) ?? []) as AppRole[];
     const orgRole = rolesData?.find((r) => r.org_id);
 
-    setLoading(false);
-
     // Platform staff
     if (isPlatformStaff(userRoles)) {
-      navigate("/admin");
+      setLoading(false);
+      const destination = requestedPath?.startsWith("/admin") ? requestedPath : "/admin";
+      navigate(destination, { replace: true });
       return;
     }
 
@@ -72,11 +80,13 @@ const Login = () => {
         .limit(1)
         .single();
 
-      if (sub?.status === "active") {
-        navigate("/portal/dashboard");
-      } else {
-        navigate("/portal/pending");
+      setLoading(false);
+      if (requestedPath?.startsWith("/portal")) {
+        navigate(requestedPath, { replace: true });
+        return;
       }
+
+      navigate(sub?.status === "active" ? "/portal/dashboard" : "/portal/pending", { replace: true });
       return;
     }
 
@@ -88,17 +98,21 @@ const Login = () => {
         .eq("user_id", data.user.id)
         .single();
 
-      const completion = (talentProfile as any)?.profile_completion_percentage ?? 0;
-      if (completion < 50) {
-        navigate("/talents/profile");
-      } else {
-        navigate("/talents/dashboard");
-      }
+      const completion = (talentProfile as { profile_completion_percentage?: number } | null)?.profile_completion_percentage ?? 0;
+      const defaultTalentPath = completion < 50 ? "/talents/profile" : "/talents/dashboard";
+
+      setLoading(false);
+      const destination =
+        requestedPath && (requestedPath.startsWith("/talents") || requestedPath.startsWith("/talent"))
+          ? requestedPath
+          : defaultTalentPath;
+
+      navigate(destination, { replace: true });
       return;
     }
 
-    // Default
-    navigate("/");
+    setLoading(false);
+    navigate("/", { replace: true });
   };
 
   return (
