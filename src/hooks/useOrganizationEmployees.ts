@@ -77,7 +77,6 @@ export function useOrganizationEmployees() {
 
       if (error) throw error;
 
-      // Enrich with talent profile data
       const enriched: OrganizationEmployee[] = [];
       for (const emp of data || []) {
         let talent_avatar = null;
@@ -99,7 +98,6 @@ export function useOrganizationEmployees() {
           }
         }
 
-        // Get manager name
         let manager_name: string | null = null;
         if (emp.manager_employee_id) {
           const mgr = (data || []).find((e: any) => e.id === emp.manager_employee_id);
@@ -142,7 +140,6 @@ export function useOrganizationEmployees() {
       });
       if (error) throw error;
 
-      // Send notification if linked to a talent
       if (data.user_id) {
         const { data: org } = await supabase
           .from("organizations")
@@ -184,6 +181,40 @@ export function useOrganizationEmployees() {
     },
   });
 
+  const deleteEmployee = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("organization_employees")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-employees"] });
+      toast({ title: "تم حذف الموظف بنجاح" });
+    },
+    onError: (err: any) => {
+      toast({ title: "خطأ", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const bulkDeleteEmployees = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from("organization_employees")
+        .delete()
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-employees"] });
+      toast({ title: "تم حذف الموظفين المحددين بنجاح" });
+    },
+    onError: (err: any) => {
+      toast({ title: "خطأ", description: err.message, variant: "destructive" });
+    },
+  });
+
   const stats = {
     total: employeesQuery.data?.filter((e) => e.status === "active").length || 0,
     pending: employeesQuery.data?.filter((e) => ["invited", "pending_acceptance"].includes(e.status)).length || 0,
@@ -197,6 +228,8 @@ export function useOrganizationEmployees() {
     orgId,
     createEmployee,
     updateEmployee,
+    deleteEmployee,
+    bulkDeleteEmployees,
   };
 }
 
