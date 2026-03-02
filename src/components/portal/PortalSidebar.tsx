@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, FileText, Users, CreditCard, Settings, LogOut, Building2 } from "lucide-react";
+import { LayoutDashboard, Briefcase, FileText, Users, CreditCard, Settings, LogOut, Building2, UserCog } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ const mainItems = [
   { title: "ملف الجمعية", url: "/portal/profile", icon: Building2 },
   { title: "الوظائف", url: "/portal/jobs", icon: Briefcase },
   { title: "الطلبات الواردة", url: "/portal/applications", icon: FileText },
+  { title: "الموارد البشرية", url: "/portal/hr", icon: UserCog },
   { title: "الفريق", url: "/portal/team", icon: Users },
   { title: "الاشتراك", url: "/portal/billing", icon: CreditCard },
   { title: "الإعدادات", url: "/portal/settings", icon: Settings },

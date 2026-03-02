@@ -160,6 +160,63 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_invites: {
+        Row: {
+          created_at: string
+          employee_id: string | null
+          expires_at: string
+          id: string
+          invitee_email: string
+          invitee_name: string
+          invitee_phone: string | null
+          organization_id: string
+          role_in_org: Database["public"]["Enums"]["org_member_role"]
+          status: Database["public"]["Enums"]["invite_status"]
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string | null
+          expires_at?: string
+          id?: string
+          invitee_email: string
+          invitee_name: string
+          invitee_phone?: string | null
+          organization_id: string
+          role_in_org?: Database["public"]["Enums"]["org_member_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string | null
+          expires_at?: string
+          id?: string
+          invitee_email?: string
+          invitee_name?: string
+          invitee_phone?: string | null
+          organization_id?: string
+          role_in_org?: Database["public"]["Enums"]["org_member_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_invites_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "organization_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_invites_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           applicant_type: string
@@ -614,6 +671,87 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_employees: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          department: string | null
+          email: string | null
+          employee_number: string | null
+          employment_type: Database["public"]["Enums"]["org_employee_type"]
+          full_name: string
+          id: string
+          job_title: string
+          manager_employee_id: string | null
+          national_id_or_iqama: string | null
+          organization_id: string
+          phone: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["employee_status"]
+          talent_profile_id: string | null
+          updated_at: string
+          user_id: string | null
+          work_mode: Database["public"]["Enums"]["org_work_mode"]
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          department?: string | null
+          email?: string | null
+          employee_number?: string | null
+          employment_type?: Database["public"]["Enums"]["org_employee_type"]
+          full_name: string
+          id?: string
+          job_title?: string
+          manager_employee_id?: string | null
+          national_id_or_iqama?: string | null
+          organization_id: string
+          phone?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["employee_status"]
+          talent_profile_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          work_mode?: Database["public"]["Enums"]["org_work_mode"]
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          department?: string | null
+          email?: string | null
+          employee_number?: string | null
+          employment_type?: Database["public"]["Enums"]["org_employee_type"]
+          full_name?: string
+          id?: string
+          job_title?: string
+          manager_employee_id?: string | null
+          national_id_or_iqama?: string | null
+          organization_id?: string
+          phone?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["employee_status"]
+          talent_profile_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          work_mode?: Database["public"]["Enums"]["org_work_mode"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_employees_manager_employee_id_fkey"
+            columns: ["manager_employee_id"]
+            isOneToOne: false
+            referencedRelation: "organization_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
@@ -1062,6 +1200,12 @@ export type Database = {
         | "in_review"
         | "interview"
         | "offer"
+      employee_status:
+        | "invited"
+        | "pending_acceptance"
+        | "active"
+        | "inactive"
+        | "terminated"
       employment_type:
         | "full_time"
         | "part_time"
@@ -1070,6 +1214,7 @@ export type Database = {
         | "consultant"
         | "volunteer"
       experience_level: "junior" | "mid" | "senior" | "any" | "leadership"
+      invite_status: "sent" | "opened" | "accepted" | "expired" | "canceled"
       job_status:
         | "draft"
         | "submitted"
@@ -1080,7 +1225,15 @@ export type Database = {
         | "expired"
         | "archived"
         | "suspended"
+      org_employee_type:
+        | "full_time"
+        | "part_time"
+        | "contract"
+        | "intern"
+        | "volunteer"
+      org_member_role: "employee" | "hr" | "manager"
       org_status: "pending" | "active" | "suspended"
+      org_work_mode: "onsite" | "remote" | "hybrid"
       profile_status:
         | "draft"
         | "submitted"
@@ -1237,6 +1390,13 @@ export const Constants = {
         "interview",
         "offer",
       ],
+      employee_status: [
+        "invited",
+        "pending_acceptance",
+        "active",
+        "inactive",
+        "terminated",
+      ],
       employment_type: [
         "full_time",
         "part_time",
@@ -1246,6 +1406,7 @@ export const Constants = {
         "volunteer",
       ],
       experience_level: ["junior", "mid", "senior", "any", "leadership"],
+      invite_status: ["sent", "opened", "accepted", "expired", "canceled"],
       job_status: [
         "draft",
         "submitted",
@@ -1257,7 +1418,16 @@ export const Constants = {
         "archived",
         "suspended",
       ],
+      org_employee_type: [
+        "full_time",
+        "part_time",
+        "contract",
+        "intern",
+        "volunteer",
+      ],
+      org_member_role: ["employee", "hr", "manager"],
       org_status: ["pending", "active", "suspended"],
+      org_work_mode: ["onsite", "remote", "hybrid"],
       profile_status: [
         "draft",
         "submitted",
