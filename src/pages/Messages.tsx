@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useThreads, useMessages, useSendMessage, ThreadWithDetails } from "@/hooks/useMessages";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 
 const Messages = () => {
   const { user, loading: authLoading } = useAuth();
@@ -24,6 +25,7 @@ const Messages = () => {
   const { data: threads = [], isLoading: threadsLoading } = useThreads();
   const { data: messages = [], isLoading: messagesLoading } = useMessages(activeThreadId);
   const sendMessage = useSendMessage();
+  const { isOtherTyping, sendTyping } = useTypingIndicator(activeThreadId);
 
   const filteredThreads = threads.filter((t) =>
     !searchQuery || t.other_user?.full_name?.includes(searchQuery) || t.other_user?.org_name?.includes(searchQuery)
@@ -134,7 +136,7 @@ const Messages = () => {
                                   : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                               }`}
                             >
-                              {thread.other_user?.user_type === "org" ? "جمعية" : "كادر"}
+                              {thread.other_user?.user_type === "org" ? "كيان" : "كادر"}
                             </Badge>
                           </div>
                           <span className="text-[11px] text-muted-foreground whitespace-nowrap">
@@ -188,7 +190,7 @@ const Messages = () => {
                               : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                           }`}
                         >
-                          {activeThread.other_user?.user_type === "org" ? "جمعية" : "كادر"}
+                          {activeThread.other_user?.user_type === "org" ? "كيان" : "كادر"}
                         </Badge>
                       </div>
                       {activeThread.other_user?.profile_link && (
@@ -231,10 +233,24 @@ const Messages = () => {
                     <div ref={messagesEndRef} />
                   </div>
 
+                  {/* Typing indicator */}
+                  {isOtherTyping && (
+                    <div className="px-4 pb-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex gap-0.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
+                        </div>
+                        <span>يكتب الآن...</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Input */}
                   <div className="border-t p-4">
                     <div className="flex items-center gap-2">
-                      <Input placeholder="اكتب رسالتك..." value={messageText} onChange={(e) => setMessageText(e.target.value)} onKeyDown={handleKeyDown} className="flex-1 rounded-xl" maxLength={2000} />
+                      <Input placeholder="اكتب رسالتك..." value={messageText} onChange={(e) => { setMessageText(e.target.value); sendTyping(); }} onKeyDown={handleKeyDown} className="flex-1 rounded-xl" maxLength={2000} />
                       <Button size="icon" className="rounded-xl" onClick={handleSend} disabled={!messageText.trim() || sendMessage.isPending}>
                         <Send className="h-4 w-4" />
                       </Button>

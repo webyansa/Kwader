@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useChatWidget } from "@/contexts/ChatWidgetContext";
 import { useMessages, useSendMessage, useUnreadCount } from "@/hooks/useMessages";
 import { useAuth } from "@/hooks/useAuth";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +20,7 @@ const ChatWidget = () => {
   const [text, setText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { isOtherTyping, sendTyping } = useTypingIndicator(threadId);
 
   useEffect(() => {
     if (scrollRef.current && isOpen) {
@@ -139,13 +141,27 @@ const ChatWidget = () => {
               )}
             </div>
 
+            {/* Typing indicator */}
+            {isOtherTyping && (
+              <div className="px-4 pb-1">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex gap-0.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
+                  </div>
+                  <span>يكتب الآن...</span>
+                </div>
+              </div>
+            )}
+
             {/* Footer */}
             <div className="border-t bg-card p-3">
               <div className="flex items-end gap-2">
                 <textarea
                   ref={inputRef}
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => { setText(e.target.value); sendTyping(); }}
                   onKeyDown={handleKeyDown}
                   placeholder="اكتب رسالتك..."
                   rows={1}

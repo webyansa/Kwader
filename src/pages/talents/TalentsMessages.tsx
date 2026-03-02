@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useThreads, useMessages, useSendMessage, ThreadWithDetails } from "@/hooks/useMessages";
 import { useContactMessages, useUpdateContactStatus, useNewContactCount, ContactMessage } from "@/hooks/useContactMessages";
 import { useGetOrCreateThread } from "@/hooks/useMessages";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 
 const messageTypeLabels: Record<string, string> = {
   hiring: "توظيف", consulting: "استشارة", service: "خدمة", collaboration: "تعاون", other: "أخرى",
@@ -47,6 +48,7 @@ const TalentsMessages = () => {
   const getOrCreateThread = useGetOrCreateThread();
 
   const activeThread = threads.find((t) => t.id === selectedThread);
+  const { isOtherTyping, sendTyping } = useTypingIndicator(selectedThread);
   const filteredThreads = threads.filter((t) =>
     !searchQuery || t.other_user?.full_name?.includes(searchQuery) || t.other_user?.org_name?.includes(searchQuery)
   );
@@ -154,7 +156,7 @@ const TalentsMessages = () => {
                                   : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                               }`}
                             >
-                              {thread.other_user?.user_type === "org" ? "جمعية" : "كادر"}
+                              {thread.other_user?.user_type === "org" ? "كيان" : "كادر"}
                             </Badge>
                           </div>
                           <span className="shrink-0 text-[10px] text-muted-foreground">
@@ -228,7 +230,7 @@ const TalentsMessages = () => {
                               : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                           }`}
                         >
-                          {activeThread.other_user?.user_type === "org" ? "جمعية" : "كادر"}
+                          {activeThread.other_user?.user_type === "org" ? "كيان" : "كادر"}
                         </Badge>
                       </div>
                       {activeThread.other_user?.profile_link && (
@@ -279,12 +281,26 @@ const TalentsMessages = () => {
                     <div ref={messagesEndRef} />
                   </div>
 
+                  {/* Typing indicator */}
+                  {isOtherTyping && (
+                    <div className="px-4 pb-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex gap-0.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
+                        </div>
+                        <span>يكتب الآن...</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Input */}
                   <div className="border-t p-3">
                     <div className="flex gap-2">
                       <Input
                         value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
+                        onChange={(e) => { setChatInput(e.target.value); sendTyping(); }}
                         placeholder="اكتب رسالتك..."
                         className="rounded-xl"
                         onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendChat()}
