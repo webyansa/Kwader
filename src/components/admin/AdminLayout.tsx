@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,23 +6,14 @@ import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import AuthAccessSkeleton from "@/components/auth/AuthAccessSkeleton";
 
 const AdminLayout = () => {
-  const { user, roles, loading } = useAuth();
+  const { user, roles } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return <AuthAccessSkeleton message="جارٍ تجهيز لوحة التحكم المركزية..." />;
   }
-
-  const isAdmin = roles.some((r) => ["super_admin", "admin", "moderator"].includes(r));
-  if (!user || !isAdmin) return <Navigate to="/login" replace />;
 
   const initials = user.email?.substring(0, 2).toUpperCase() || "AD";
 

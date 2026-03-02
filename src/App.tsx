@@ -74,7 +74,15 @@ import CvDownloadProxy from "./pages/CvDownloadProxy";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <HelmetProvider>
